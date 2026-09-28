@@ -64,9 +64,13 @@ Gitea Actions reads the same addresses from repository variables, and reads the 
 
 ## License
 
-This repository is a build recipe. It is not covered by one license.
+Licensing for this repository is scoped in `LICENSE`.
 
-`libmpv` builds pass `-Dgpl=false`. FFmpeg builds do not pass `--enable-gpl` or `--enable-nonfree`, and they do not link `libx264`, `libx265`, or `libfdk-aac`. The component versions and license names are in `build-manifests/`.
+Octans-authored build scripts, Dockerfiles, workflows, manifests, and repository metadata are under the MIT License. The text is `LICENSES/MIT.txt`. `scripts/overlays/media3-ffmpeg-decoder/` stays under the Apache License, Version 2.0, as stated in its file headers. The text is `LICENSES/Apache-2.0.txt`.
+
+Components downloaded at build time keep the licenses recorded in `build-manifests/`. This repository does not relicense them.
+
+`libmpv` builds pass `-Dgpl=false`. FFmpeg builds do not pass `--enable-gpl` or `--enable-nonfree`, and they do not link `libx264`, `libx265`, or `libfdk-aac`.
 
 Recorded component licenses include LGPL-2.1-or-later, LGPL-3.0-or-later, ISC, MIT, FTL, Zlib, BSD-2-Clause, WTFPL, Apache-2.0, libpng-2.0, and GPL-3.0-or-later WITH GCC-exception-3.1 for the MinGW GCC runtime. The libass renderer manifest records FreeType as `FreeType License or GPL-2.0-only`. The Media3 decoder module is Apache-2.0, and its FFmpeg `release/6.0` checkout is configured with GPL and nonfree disabled. The `libass-android` wrapper is MIT.
 

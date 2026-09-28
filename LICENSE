@@ -1,0 +1,26 @@
+Octans Player Runtime licensing
+
+This repository is a build recipe. Different files use different licenses.
+
+1. Octans-authored build files
+
+Copyright (c) 2026 Octans Media
+
+These paths are under the MIT License. The license text is LICENSES/MIT.txt:
+
+- scripts/, except scripts/overlays/media3-ffmpeg-decoder/
+- Dockerfile*
+- .gitea/workflows/
+- build-manifests/
+- README.md, AGENTS.md, and the other metadata files at the repository root
+
+2. Media3 FFmpeg decoder overlay
+
+scripts/overlays/media3-ffmpeg-decoder/ is under the Apache License, Version 2.0,
+as stated in the file headers. The license text is LICENSES/Apache-2.0.txt.
+
+3. Components downloaded at build time
+
+The components recorded in build-manifests/ are not part of this repository.
+This file does not change their licenses. Built artifacts must ship their
+licenses/ and sources/ trees with the binaries.
