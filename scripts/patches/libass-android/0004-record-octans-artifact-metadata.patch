@@ -1,0 +1,20 @@
+diff --git a/OCTANS_ARTIFACT.md b/OCTANS_ARTIFACT.md
+new file mode 100644
+index 0000000..af28b7d
+--- /dev/null
++++ b/OCTANS_ARTIFACT.md
+@@ -0,0 +1,14 @@
++# Octans libass-android Artifact Metadata
++
++This source tree is patched by `octans-player-runtime` to build the
++`octans-player-runtime-lgpl-media3-libass-renderer-android` verified AAR artifact.
++
++Authoritative build metadata is generated outside this source tree in
++`runtime-manifest.json`. This marker records that the source bundle has Octans
++native ownership patches applied:
++
++- upstream baseline: `peerless2012/libass-android` `v0.5.0-beta01`
++- renderer library: `liboctans_ass_renderer.so`
++- JNI bridge library: `liboctans_ass_renderer_jni.so`
++- packaged Android ABIs: `arm64-v8a`, `armeabi-v7a`
++- duplicate `libc++_shared.so` packaging excluded from the AAR

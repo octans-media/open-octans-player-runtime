@@ -1,0 +1,46 @@
+FROM ubuntu:26.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    OCTANS_RUNTIME_ROOT=/workspace \
+    OCTANS_RUNTIME_OUTPUT=/dist \
+    OCTANS_RUNTIME_SOURCE_CACHE=/cache/sources
+
+RUN apt-get update \
+ && apt-get dist-upgrade -y \
+ && apt-get install -y --no-install-recommends \
+    autoconf \
+    automake \
+    bash \
+    binutils-mingw-w64-x86-64 \
+    build-essential \
+    ca-certificates \
+    cmake \
+    curl \
+    g++-mingw-w64-x86-64 \
+    gcc-mingw-w64-x86-64 \
+    git \
+    jq \
+    libtool \
+    make \
+    meson \
+    mingw-w64 \
+    nasm \
+    ninja-build \
+    pkg-config \
+    python3 \
+    python3-pip \
+    tar \
+    unzip \
+    xz-utils \
+    yasm \
+    zip \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+COPY build-manifests/ /workspace/build-manifests/
+COPY scripts/container/ /workspace/scripts/container/
+COPY scripts/verify-runtime-artifact.sh /workspace/scripts/verify-runtime-artifact.sh
+
+ENTRYPOINT ["/workspace/scripts/container/build-win64-lgpl-runtime.sh"]

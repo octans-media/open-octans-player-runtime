@@ -1,0 +1,30 @@
+diff --git a/lib_ass/build.gradle.kts b/lib_ass/build.gradle.kts
+index 5979902..d1d5f6c 100644
+--- a/lib_ass/build.gradle.kts
++++ b/lib_ass/build.gradle.kts
+@@ -25,6 +25,10 @@ android {
+         }
+     }
+
++    packaging {
++        jniLibs.excludes += "**/libc++_shared.so"
++    }
++
+     buildFeatures {
+         prefabPublishing = true
+     }
+diff --git a/lib_ass_kt/build.gradle.kts b/lib_ass_kt/build.gradle.kts
+index b6a30ad..78ce714 100644
+--- a/lib_ass_kt/build.gradle.kts
++++ b/lib_ass_kt/build.gradle.kts
+@@ -25,6 +25,10 @@ android {
+         }
+     }
+
++    packaging {
++        jniLibs.excludes += "**/libc++_shared.so"
++    }
++
+     buildFeatures {
+         prefab = true
+     }

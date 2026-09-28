@@ -1,0 +1,231 @@
+{
+  "runtimeId": "octans-player-runtime-lgpl-android-armeabi-v7a",
+  "target": "android-armeabi-v7a",
+  "abi": "armeabi-v7a",
+  "androidApi": 28,
+  "requiresNeon": true,
+  "licenseFlavor": "LGPL",
+  "toolchain": {
+    "name": "android-ndk",
+    "version": "29.0.14206865",
+    "ref": "r29",
+    "license": "Android Software Development Kit License Agreement",
+    "sourceUrl": "https://dl.google.com/android/repository/android-ndk-r29-linux.zip",
+    "sourceHash": {
+      "sha1": "87e2bb7e9be5d6a1c6cdf5ec40dd4e0c6d07c30b"
+    },
+    "purpose": "Android armeabi-v7a cross toolchain only; not bundled into the LGPL runtime artifact"
+  },
+  "components": [
+    {
+      "name": "mpv",
+      "version": "0.41.0",
+      "ref": "v0.41.0",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/mpv-player/mpv/archive/refs/tags/v0.41.0.tar.gz",
+      "sourceHash": {
+        "sha256": "ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209"
+      },
+      "purpose": "libmpv client API and Android playback core"
+    },
+    {
+      "name": "ffmpeg",
+      "version": "8.1.1",
+      "ref": "ffmpeg-8.1.1",
+      "license": "LGPL-3.0-or-later",
+      "sourceUrl": "https://ffmpeg.org/releases/ffmpeg-8.1.1.tar.xz",
+      "sourceHash": {
+        "sha256": "b6863adde98898f42602017462871b5f6333e65aec803fdd7a6308639c52edf3"
+      },
+      "purpose": "demux, decode, subtitle decode, MediaCodec/JNI integration and protocol stack"
+    },
+    {
+      "name": "libplacebo",
+      "version": "7.360.1",
+      "ref": "v7.360.1",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/haasn/libplacebo.git",
+      "sourceHash": {
+        "commit": "cee9b076f2c63104ccfd497fa79c39a867293ec4"
+      },
+      "purpose": "gpu-next renderer, HDR tone mapping and Dolby Vision reshaping support without libdovi"
+    },
+    {
+      "name": "libass",
+      "version": "0.17.4",
+      "ref": "0.17.4",
+      "license": "ISC",
+      "sourceUrl": "https://github.com/libass/libass.git",
+      "sourceHash": {
+        "commit": "bbb3c7f1570a4a021e52683f3fbdf74fe492ae84"
+      },
+      "purpose": "ASS / SSA subtitle rendering"
+    },
+    {
+      "name": "freetype2",
+      "version": "2.14.3",
+      "ref": "2.14.3",
+      "license": "FTL",
+      "sourceUrl": "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.3.tar.xz",
+      "sourceHash": {
+        "sha256": "36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f"
+      },
+      "purpose": "font rasterization for libass subtitles"
+    },
+    {
+      "name": "fribidi",
+      "version": "1.0.16",
+      "ref": "v1.0.16",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/fribidi/fribidi/releases/download/v1.0.16/fribidi-1.0.16.tar.xz",
+      "sourceHash": {
+        "sha256": "1b1cde5b235d40479e91be2f0e88a309e3214c8ab470ec8a2744d82a5a9ea05c"
+      },
+      "purpose": "bidirectional text shaping for subtitles"
+    },
+    {
+      "name": "harfbuzz",
+      "version": "13.0.1",
+      "ref": "13.0.1",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/harfbuzz/harfbuzz/releases/download/13.0.1/harfbuzz-13.0.1.tar.xz",
+      "sourceHash": {
+        "sha256": "3553d943401c34ab9b8c75f35cdb8452ca660233b0e9d4a22395ce5245484bd7"
+      },
+      "purpose": "glyph shaping for subtitles"
+    },
+    {
+      "name": "libpng",
+      "version": "1.6.58",
+      "ref": "v1.6.58",
+      "license": "libpng-2.0",
+      "sourceUrl": "https://github.com/pnggroup/libpng/archive/v1.6.58.tar.gz",
+      "sourceHash": {
+        "sha256": "a9d4df463d36a6e5f9c29bd6f4967312d17e996c1854f3511f833924eb1993cf"
+      },
+      "purpose": "FreeType and subtitle image support"
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.2",
+      "ref": "v1.3.2",
+      "license": "Zlib",
+      "sourceUrl": "https://zlib.net/zlib-1.3.2.tar.xz",
+      "sourceHash": {
+        "sha256": "d7a0654783a4da529d1bb793b7ad9c3318020af77667bcae35f95d0e42a792f3"
+      },
+      "purpose": "compression support for FFmpeg, libpng and font stack"
+    },
+    {
+      "name": "dav1d",
+      "version": "1.5.3",
+      "ref": "1.5.3",
+      "license": "BSD-2-Clause",
+      "sourceUrl": "https://code.videolan.org/videolan/dav1d.git",
+      "sourceHash": {
+        "commit": "b546257f770768b2c88258c533da38b91a06f737"
+      },
+      "purpose": "AV1 software decode fallback"
+    },
+    {
+      "name": "zimg",
+      "version": "3.0.6",
+      "ref": "release-3.0.6",
+      "license": "WTFPL",
+      "sourceUrl": "https://github.com/sekrit-twc/zimg.git",
+      "sourceHash": {
+        "commit": "f819b14e8f39d1282400b0d9543e8ef73c1b2bbd"
+      },
+      "purpose": "high-quality scaling and color conversion fallback"
+    },
+    {
+      "name": "lcms2",
+      "version": "2.19.1",
+      "ref": "lcms2.19.1",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/mm2/Little-CMS.git",
+      "sourceHash": {
+        "commit": "21c582a594fe5279f90c0b93437c398f93bf62b0"
+      },
+      "purpose": "ICC color management for libplacebo and mpv"
+    },
+    {
+      "name": "mbedtls",
+      "version": "3.6.6",
+      "ref": "mbedtls-3.6.6",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.6/mbedtls-3.6.6.tar.bz2",
+      "sourceHash": {
+        "sha256": "8fb65fae8dcae5840f793c0a334860a411f884cc537ea290ce1c52bb64ca007a"
+      },
+      "purpose": "HTTPS / TLS protocol support for FFmpeg without OpenSSL"
+    },
+    {
+      "name": "libxml2",
+      "version": "2.15.3",
+      "ref": "v2.15.3",
+      "license": "MIT",
+      "sourceUrl": "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.3.tar.xz",
+      "sourceHash": {
+        "md5": "b7b0123654f86ebf630a5cbedaafdece"
+      },
+      "purpose": "XML parser used by fontconfig"
+    },
+    {
+      "name": "fontconfig",
+      "version": "2.17.1",
+      "ref": "2.17.1",
+      "license": "MIT",
+      "sourceUrl": "https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/2.17.1/fontconfig-2.17.1.tar.xz",
+      "sourceHash": {
+        "md5": "f68f95052c7297b98eccb7709d817f6a"
+      },
+      "purpose": "system font provider for libass on Android"
+    },
+    {
+      "name": "libunibreak",
+      "version": "7.0",
+      "ref": "libunibreak_7_0",
+      "license": "Zlib",
+      "sourceUrl": "https://github.com/adah1972/libunibreak.git",
+      "sourceHash": {
+        "commit": "3ce4bfa3129ff3738046a44a6db533d2ce25af2b"
+      },
+      "purpose": "Unicode line breaking support for libass ASS_FEATURE_WRAP_UNICODE"
+    }
+  ],
+  "forbidden": [
+    "--enable-gpl",
+    "--enable-nonfree",
+    "--enable-libx264",
+    "--enable-libx265",
+    "--enable-libfdk-aac",
+    "--enable-openssl",
+    "libx264",
+    "libx265",
+    "libfdk_aac",
+    "libdvdcss",
+    "GPL-only",
+    "AGPL",
+    "nonfree",
+    "proprietary"
+  ],
+  "androidProfiles": {
+    "default": {
+      "description": "Default Android playback should prefer gpu-next while allowing normal hardware decode policy.",
+      "mpvOptions": {
+        "vo": "gpu-next",
+        "gpu-context": "android"
+      }
+    },
+    "dolbyVisionP5ColorFix": {
+      "description": "Candidate profile from mpv-android 2026-04-25 manual validation; not a hardware decode guarantee.",
+      "mpvOptions": {
+        "vo": "gpu-next",
+        "gpu-context": "android",
+        "hwdec": "no",
+        "tone-mapping": "auto"
+      }
+    }
+  }
+}

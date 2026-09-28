@@ -1,0 +1,117 @@
+name: m3ass-smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".gitea/workflows/m3ass-smoke.yml"
+      - "Dockerfile.media3-libass-renderer-android"
+      - "build-manifests/media3-libass-renderer-android-components.json"
+      - "scripts/build-media3-libass-renderer-android.sh"
+      - "scripts/container/build-media3-libass-renderer-android.sh"
+      - "scripts/verify-media3-libass-renderer-artifact.sh"
+      - "scripts/patches/libass-android/**"
+      - "scripts/ci-prune-stale-run-cache.sh"
+      - "scripts/docker-restore-bind-mount-ownership.sh"
+
+env:
+  OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT: ${{ vars.OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT }}
+
+jobs:
+  smoke:
+    runs-on: ${{ vars.OCTANS_FFMPEG_RUNNER }}
+    timeout-minutes: 480
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Plan m3ass smoke build
+        run: |
+          set -euo pipefail
+
+          revision="$(git rev-parse HEAD)"
+          short_sha="${GITHUB_SHA:-${revision}}"
+          short_sha="${short_sha:0:8}"
+          ci_timestamp="$(date -u +%Y%m%d%H%M%S)"
+          ci_id="m3ass-${ci_timestamp}-${short_sha}"
+
+          runtime_id="octans-player-runtime-lgpl-media3-libass-renderer-android"
+          run_root="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/runs"
+          build_root="${run_root}/${ci_id}"
+          output_root="${build_root}/dist"
+          source_cache="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/sources/m3ass"
+          android_sdk_root="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/android-sdk/m3ass"
+          gradle_user_home="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/gradle/m3ass"
+          build_version="0.0.0-ci.${ci_timestamp}.${short_sha}"
+          image_name="octans-player-runtime-m3ass:ci-${ci_timestamp}-${short_sha}"
+          artifact_root="${output_root}/${runtime_id}"
+
+          mkdir -p "${run_root}" "${source_cache}" "${android_sdk_root}" "${gradle_user_home}"
+          scripts/ci-prune-stale-run-cache.sh "${run_root}" 7
+
+          {
+            echo "OCTANS_PLAYER_RUNTIME_BUILD_ROOT=${build_root}"
+            echo "OCTANS_PLAYER_RUNTIME_OUTPUT_ROOT=${output_root}"
+            echo "OCTANS_PLAYER_RUNTIME_SOURCE_CACHE=${source_cache}"
+            echo "OCTANS_PLAYER_RUNTIME_ANDROID_SDK_ROOT=${android_sdk_root}"
+            echo "OCTANS_PLAYER_RUNTIME_GRADLE_USER_HOME=${gradle_user_home}"
+            echo "OCTANS_PLAYER_RUNTIME_BUILD_VERSION=${build_version}"
+            echo "OCTANS_PLAYER_RUNTIME_IMAGE_NAME=${image_name}"
+            echo "OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT=${artifact_root}"
+          } >> "${GITHUB_ENV}"
+
+          printf 'm3ass smoke build plan:\n'
+          printf '  revision: %s\n' "${revision}"
+          printf '  build_root: %s\n' "${build_root}"
+          printf '  source_cache: %s\n' "${source_cache}"
+          printf '  android_sdk_root: %s\n' "${android_sdk_root}"
+          printf '  gradle_user_home: %s\n' "${gradle_user_home}"
+          printf '  build_version: %s\n' "${build_version}"
+          printf '  image_name: %s\n' "${image_name}"
+          printf '  artifact_root: %s\n' "${artifact_root}"
+
+      - name: Build m3ass artifact
+        run: |
+          set -euo pipefail
+
+          OCTANS_RUNTIME_VERSION="${OCTANS_PLAYER_RUNTIME_BUILD_VERSION}" \
+          OCTANS_RUNTIME_SOURCE_CACHE="${OCTANS_PLAYER_RUNTIME_SOURCE_CACHE}" \
+          OCTANS_ANDROID_SDK_ROOT="${OCTANS_PLAYER_RUNTIME_ANDROID_SDK_ROOT}" \
+          GRADLE_USER_HOME="${OCTANS_PLAYER_RUNTIME_GRADLE_USER_HOME}" \
+          scripts/build-media3-libass-renderer-android.sh \
+            --image "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME}" \
+            --output-root "${OCTANS_PLAYER_RUNTIME_OUTPUT_ROOT}"
+
+      - name: Verify m3ass artifact
+        run: |
+          set -euo pipefail
+          scripts/verify-media3-libass-renderer-artifact.sh "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}"
+
+      - name: Report local artifact
+        run: |
+          set -euo pipefail
+
+          printf 'm3ass smoke build completed:\n'
+          printf '  artifact_root: %s\n' "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}"
+          printf '  artifact_size: '
+          du -sh "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}" | awk '{print $1}'
+          printf '  manifest_version: '
+          jq -r '.version' "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}/runtime-manifest.json"
+          printf '  abis: '
+          jq -r '.abis | join(",")' "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}/runtime-manifest.json"
+          printf '  lib_ass_kt_aar_sha256: '
+          sha256sum "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}/aar/lib_ass_kt-release.aar" | awk '{print $1}'
+          printf '  lib_ass_media_aar_sha256: '
+          sha256sum "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}/aar/lib_ass_media-release.aar" | awk '{print $1}'
+
+      - name: Cleanup local Docker image
+        if: always()
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME:-}" ]]; then
+            docker image rm "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME}" >/dev/null 2>&1 || true
+          fi

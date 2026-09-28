@@ -1,0 +1,169 @@
+diff --git a/lib_ass_kt/src/main/cpp/AssKt.c b/lib_ass_kt/src/main/cpp/AssKt.c
+index c691327..5910c6b 100644
+--- a/lib_ass_kt/src/main/cpp/AssKt.c
++++ b/lib_ass_kt/src/main/cpp/AssKt.c
+@@ -51,6 +51,28 @@ void nativeAssClearFont(JNIEnv* env, jclass clazz, jlong ass) {
+     ass_clear_fonts((ASS_Library *) ass);
+ }
+
++static const char* getOptionalString(JNIEnv* env, jstring value) {
++    if (value == NULL) {
++        return NULL;
++    }
++    return (*env)->GetStringUTFChars(env, value, NULL);
++}
++
++static void releaseOptionalString(JNIEnv* env, jstring value, const char* chars) {
++    if (value != NULL && chars != NULL) {
++        (*env)->ReleaseStringUTFChars(env, value, chars);
++    }
++}
++
++void nativeAssConfigureFonts(JNIEnv* env, jclass clazz, jlong ass, jstring defaultFont, jstring defaultFamily, jstring fontConfig, jstring fontsDir) {
++    if (!ass) return;
++    const char* cFontsDir = getOptionalString(env, fontsDir);
++    if (cFontsDir != NULL && strlen(cFontsDir) > 0) {
++        ass_set_fonts_dir((ASS_Library *) ass, cFontsDir);
++    }
++    releaseOptionalString(env, fontsDir, cFontsDir);
++}
++
+ void nativeAssDeinit(JNIEnv* env, jclass clazz, jlong ass) {
+     if (ass) {
+         ass_library_done((ASS_Library *) ass);
+@@ -61,6 +83,7 @@ static JNINativeMethod method_table[] = {
+         {"nativeAssInit", "()J", (void*)nativeAssInit},
+         {"nativeAssAddFont", "(JLjava/lang/String;[B)V", (void*) nativeAssAddFont},
+         {"nativeAssClearFont", "(J)V", (void*) nativeAssClearFont},
++        {"nativeAssConfigureFonts", "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", (void*) nativeAssConfigureFonts},
+         {"nativeAssDeinit", "(J)V", (void*)nativeAssDeinit}
+ };
+
+@@ -176,9 +199,15 @@ static JNINativeMethod trackMethodTable[] = {
+         {"nativeAssTrackDeinit", "(J)V", (void*)nativeAssTrackDeinit}
+ };
+
+-jlong nativeAssRenderInit(JNIEnv* env, jclass clazz, jlong ass) {
++jlong nativeAssRenderInit(JNIEnv* env, jclass clazz, jlong ass, jstring defaultFont, jstring defaultFamily, jstring fontConfig) {
+     ASS_Renderer *assRenderer = ass_renderer_init((ASS_Library *) ass);
+-    ass_set_fonts(assRenderer, NULL, "sans-serif", ASS_FONTPROVIDER_FONTCONFIG, NULL, 1);
++    const char* cDefaultFont = getOptionalString(env, defaultFont);
++    const char* cDefaultFamily = getOptionalString(env, defaultFamily);
++    const char* cFontConfig = getOptionalString(env, fontConfig);
++    ass_set_fonts(assRenderer, cDefaultFont, cDefaultFamily != NULL ? cDefaultFamily : "sans-serif", ASS_FONTPROVIDER_FONTCONFIG, cFontConfig, 1);
++    releaseOptionalString(env, defaultFont, cDefaultFont);
++    releaseOptionalString(env, defaultFamily, cDefaultFamily);
++    releaseOptionalString(env, fontConfig, cFontConfig);
+     return (jlong) assRenderer;
+ }
+
+@@ -362,7 +391,7 @@ void nativeAssRenderDeinit(JNIEnv* env, jclass clazz, jlong render) {
+ }
+
+ static JNINativeMethod renderMethodTable[] = {
+-        {"nativeAssRenderInit", "(J)J", (void*)nativeAssRenderInit},
++        {"nativeAssRenderInit", "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)J", (void*)nativeAssRenderInit},
+         {"nativeAssRenderSetFontScale", "(JF)V", (void*)nativeAssRenderSetFontScale},
+         {"nativeAssRenderSetCacheLimit", "(JII)V", (void*)nativeAssRenderSetCacheLimit},
+         {"nativeAssRenderSetStorageSize", "(JII)V", (void*) nativeAssRenderSetStorageSize},
+diff --git a/lib_ass_kt/src/main/java/io/github/peerless2012/ass/Ass.kt b/lib_ass_kt/src/main/java/io/github/peerless2012/ass/Ass.kt
+index dc9ca9c..86687f5 100644
+--- a/lib_ass_kt/src/main/java/io/github/peerless2012/ass/Ass.kt
++++ b/lib_ass_kt/src/main/java/io/github/peerless2012/ass/Ass.kt
+@@ -27,6 +27,15 @@ class Ass {
+         @JvmStatic
+         external fun nativeAssClearFont(ptr: Long)
+
++        @JvmStatic
++        external fun nativeAssConfigureFonts(
++            ptr: Long,
++            defaultFont: String?,
++            defaultFamily: String?,
++            fontConfig: String?,
++            fontsDir: String?,
++        )
++
+         @JvmStatic
+         external fun nativeAssDeinit(ptr: Long)
+
+@@ -37,6 +46,10 @@ class Ass {
+
+     private var nativeAss: Long = nativeAssInit()
+
++    private var renderDefaultFont: String? = null
++    private var renderDefaultFamily: String? = "sans-serif"
++    private var renderFontConfig: String? = null
++
+     @Volatile
+     var released = false
+         private set
+@@ -51,7 +64,7 @@ class Ass {
+     public fun createRender(): AssRender {
+         return lock.withLock {
+             if (released || nativeAss == 0L) throw IllegalStateException("Ass already released")
+-            AssRender(nativeAss, lock)
++            AssRender(nativeAss, lock, renderDefaultFont, renderDefaultFamily, renderFontConfig)
+         }
+     }
+
+@@ -69,6 +82,21 @@ class Ass {
+         }
+     }
+
++    public fun configureFonts(
++        defaultFont: String? = null,
++        defaultFamily: String? = "sans-serif",
++        fontConfig: String? = null,
++        fontsDir: String? = null,
++    ) {
++        lock.withLock {
++            if (released || nativeAss == 0L) return
++            renderDefaultFont = defaultFont
++            renderDefaultFamily = defaultFamily
++            renderFontConfig = fontConfig
++            nativeAssConfigureFonts(nativeAss, defaultFont, defaultFamily, fontConfig, fontsDir)
++        }
++    }
++
+     fun release() {
+         lock.withLock {
+             if (released) return
+diff --git a/lib_ass_kt/src/main/java/io/github/peerless2012/ass/AssRender.kt b/lib_ass_kt/src/main/java/io/github/peerless2012/ass/AssRender.kt
+index 877cbdf..759fe42 100644
+--- a/lib_ass_kt/src/main/java/io/github/peerless2012/ass/AssRender.kt
++++ b/lib_ass_kt/src/main/java/io/github/peerless2012/ass/AssRender.kt
+@@ -10,12 +10,23 @@ import kotlin.concurrent.withLock
+  * @Version V1.0
+  * @Description
+  */
+-class AssRender(nativeAss: Long, private val lock: ReentrantLock) {
++class AssRender(
++    nativeAss: Long,
++    private val lock: ReentrantLock,
++    defaultFont: String? = null,
++    defaultFamily: String? = "sans-serif",
++    fontConfig: String? = null,
++) {
+
+     companion object {
+
+         @JvmStatic
+-        external fun nativeAssRenderInit(ass: Long): Long
++        external fun nativeAssRenderInit(
++            ass: Long,
++            defaultFont: String?,
++            defaultFamily: String?,
++            fontConfig: String?,
++        ): Long
+
+         @JvmStatic
+         external fun nativeAssRenderSetFontScale(render: Long, scale: Float)
+@@ -36,7 +47,7 @@ class AssRender(nativeAss: Long, private val lock: ReentrantLock) {
+         external fun nativeAssRenderDeinit(render: Long)
+     }
+
+-    private var nativeRender: Long = nativeAssRenderInit(nativeAss)
++    private var nativeRender: Long = nativeAssRenderInit(nativeAss, defaultFont, defaultFamily, fontConfig)
+
+     @Volatile
+     var released = false

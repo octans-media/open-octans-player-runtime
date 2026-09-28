@@ -1,0 +1,11 @@
+/.cache/
+/build/
+/dist/
+/tmp/
+*.log
+*.zip
+*.tar
+*.tar.gz
+*.tar.xz
+*.tar.zst
+*.7z

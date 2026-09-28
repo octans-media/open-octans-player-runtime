@@ -1,0 +1,110 @@
+name: android-arm64-build-smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".gitea/workflows/android-arm64-build-smoke.yml"
+      - "Dockerfile.android-arm64-lgpl"
+      - "build-manifests/android-arm64-lgpl-components.json"
+      - "scripts/build-android-arm64-lgpl-runtime.sh"
+      - "scripts/container/build-android-arm64-lgpl-runtime.sh"
+      - "scripts/verify-android-runtime-artifact.sh"
+      - "scripts/ci-prune-stale-run-cache.sh"
+      - "scripts/docker-restore-bind-mount-ownership.sh"
+
+env:
+  OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT: ${{ vars.OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT }}
+
+jobs:
+  build:
+    runs-on: ${{ vars.OCTANS_FFMPEG_RUNNER }}
+    timeout-minutes: 480
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Plan CI build
+        run: |
+          set -euo pipefail
+
+          revision="$(git rev-parse HEAD)"
+          short_sha="${GITHUB_SHA:-${revision}}"
+          short_sha="${short_sha:0:8}"
+          ci_timestamp="$(date -u +%Y%m%d%H%M%S)"
+          ci_id="android-arm64-${ci_timestamp}-${short_sha}"
+
+          run_root="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/runs"
+          build_root="${run_root}/${ci_id}"
+          output_root="${build_root}/dist"
+          source_cache="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/sources/android-arm64"
+          build_version="0.0.0-ci.${ci_timestamp}.${short_sha}"
+          image_name="octans-player-runtime-android-arm64-lgpl:ci-${ci_timestamp}-${short_sha}"
+          artifact_root="${output_root}/octans-player-runtime-lgpl-android-arm64"
+
+          mkdir -p "${run_root}" "${source_cache}"
+          legacy_source_cache="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/sources"
+          if [[ "${legacy_source_cache}" != "${source_cache}" ]]; then
+            find "${legacy_source_cache}" \
+              -maxdepth 1 \
+              -type f \
+              -exec cp -n {} "${source_cache}/" \;
+          fi
+          scripts/ci-prune-stale-run-cache.sh "${run_root}" 7
+
+          {
+            echo "OCTANS_PLAYER_RUNTIME_BUILD_ROOT=${build_root}"
+            echo "OCTANS_PLAYER_RUNTIME_OUTPUT_ROOT=${output_root}"
+            echo "OCTANS_PLAYER_RUNTIME_SOURCE_CACHE=${source_cache}"
+            echo "OCTANS_PLAYER_RUNTIME_BUILD_VERSION=${build_version}"
+            echo "OCTANS_PLAYER_RUNTIME_IMAGE_NAME=${image_name}"
+            echo "OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT=${artifact_root}"
+          } >> "${GITHUB_ENV}"
+
+          printf 'Android arm64 runtime CI build plan:\n'
+          printf '  revision: %s\n' "${revision}"
+          printf '  build_root: %s\n' "${build_root}"
+          printf '  source_cache: %s\n' "${source_cache}"
+          printf '  build_version: %s\n' "${build_version}"
+          printf '  image_name: %s\n' "${image_name}"
+          printf '  artifact_root: %s\n' "${artifact_root}"
+
+      - name: Build Android arm64 LGPL runtime
+        run: |
+          set -euo pipefail
+
+          OCTANS_RUNTIME_VERSION="${OCTANS_PLAYER_RUNTIME_BUILD_VERSION}" \
+          OCTANS_RUNTIME_SOURCE_CACHE="${OCTANS_PLAYER_RUNTIME_SOURCE_CACHE}" \
+          scripts/build-android-arm64-lgpl-runtime.sh \
+            --image "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME}" \
+            --output-root "${OCTANS_PLAYER_RUNTIME_OUTPUT_ROOT}"
+
+      - name: Verify Android arm64 artifact
+        run: |
+          set -euo pipefail
+          scripts/verify-android-runtime-artifact.sh "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}"
+
+      - name: Report local artifact
+        run: |
+          set -euo pipefail
+
+          printf 'Android arm64 runtime CI build completed:\n'
+          printf '  artifact_root: %s\n' "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}"
+          printf '  artifact_size: '
+          du -sh "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}" | awk '{print $1}'
+          printf '  manifest_version: '
+          jq -r '.version' "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}/runtime-manifest.json"
+          printf '  file_count: '
+          find "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}" -type f | wc -l
+
+      - name: Cleanup local Docker image
+        if: always()
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME:-}" ]]; then
+            docker image rm "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME}" >/dev/null 2>&1 || true
+          fi

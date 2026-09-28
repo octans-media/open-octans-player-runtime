@@ -1,0 +1,279 @@
+name: win64-publish-stable
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "稳定版版本，例如 0.1.0"
+        required: true
+      recovery:
+        description: "仅在恢复同一版本的失败发布时填 true"
+        required: false
+        default: "false"
+
+env:
+  OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT: ${{ vars.OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT }}
+  OCTANS_GITEA_URL: ${{ vars.OCTANS_GITEA_URL }}
+  OCTANS_GITEA_HOST: ${{ vars.OCTANS_GITEA_HOST }}
+  OCTANS_GITEA_REPOSITORY_OWNER: octans
+  OCTANS_GITEA_REPOSITORY_NAME: open-octans-player-runtime
+
+jobs:
+  stable:
+    runs-on: ${{ vars.OCTANS_FFMPEG_RUNNER }}
+    timeout-minutes: 480
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Plan stable release
+        env:
+          OCTANS_PLAYER_RUNTIME_STABLE_INPUT_VERSION: ${{ github.event.inputs.version }}
+          OCTANS_PLAYER_RUNTIME_STABLE_RECOVERY_INPUT: ${{ github.event.inputs.recovery }}
+        run: |
+          set -euo pipefail
+
+          stable_version="${OCTANS_PLAYER_RUNTIME_STABLE_INPUT_VERSION:-}"
+          if [[ -z "${stable_version}" ]]; then
+            printf 'missing required stable version input\n' >&2
+            exit 1
+          fi
+
+          if [[ ! "${stable_version}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            printf 'invalid stable version: %s\n' "${stable_version}" >&2
+            printf 'expected format: 0.1.0\n' >&2
+            exit 1
+          fi
+
+          recovery="${OCTANS_PLAYER_RUNTIME_STABLE_RECOVERY_INPUT:-false}"
+          if [[ "${recovery}" != "true" && "${recovery}" != "false" ]]; then
+            printf 'invalid recovery input: %s\n' "${recovery}" >&2
+            printf 'expected: true or false\n' >&2
+            exit 1
+          fi
+
+          ref_name="${GITHUB_REF_NAME:-}"
+          if [[ -z "${ref_name}" && "${GITHUB_REF:-}" == refs/heads/* ]]; then
+            ref_name="${GITHUB_REF#refs/heads/}"
+          fi
+          if [[ -z "${ref_name}" ]]; then
+            ref_name="$(git rev-parse --abbrev-ref HEAD)"
+          fi
+
+          revision="$(git rev-parse HEAD)"
+          if [[ "${ref_name}" != "main" ]]; then
+            if git rev-parse --verify origin/main >/dev/null 2>&1 \
+              && [[ "$(git rev-parse origin/main)" == "${revision}" ]]; then
+              ref_name="main"
+            else
+              printf 'Player runtime stable publish must run from main, got: %s\n' "${ref_name}" >&2
+              exit 1
+            fi
+          fi
+
+          short_sha="${GITHUB_SHA:-${revision}}"
+          short_sha="${short_sha:0:8}"
+          ci_timestamp="$(date -u +%Y%m%d%H%M%S)"
+          ci_id="stable-${stable_version}-${ci_timestamp}-${short_sha}"
+
+          run_root="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/runs"
+          build_root="${run_root}/${ci_id}"
+          output_root="${build_root}/dist"
+          source_cache="${OCTANS_PLAYER_RUNTIME_CI_CACHE_ROOT}/sources"
+          image_name="octans-player-runtime-win64-lgpl:ci-${ci_id}"
+          artifact_root="${output_root}/octans-player-runtime-lgpl-win64"
+          release_asset_dir="${build_root}/release-assets"
+          release_tag="octans-player-runtime-lgpl-win64-${stable_version}"
+          release_title="octans-player-runtime-lgpl-win64 ${stable_version}"
+          release_notes="${release_asset_dir}/${release_tag}.md"
+
+          mkdir -p "${run_root}" "${source_cache}"
+          scripts/ci-prune-stale-run-cache.sh "${run_root}" 7
+
+          {
+            echo "OCTANS_PLAYER_RUNTIME_BUILD_ROOT=${build_root}"
+            echo "OCTANS_PLAYER_RUNTIME_OUTPUT_ROOT=${output_root}"
+            echo "OCTANS_PLAYER_RUNTIME_SOURCE_CACHE=${source_cache}"
+            echo "OCTANS_PLAYER_RUNTIME_BUILD_VERSION=${stable_version}"
+            echo "OCTANS_PLAYER_RUNTIME_IMAGE_NAME=${image_name}"
+            echo "OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT=${artifact_root}"
+            echo "OCTANS_PLAYER_RUNTIME_RELEASE_ASSET_DIR=${release_asset_dir}"
+            echo "OCTANS_PLAYER_RUNTIME_RELEASE_TAG=${release_tag}"
+            echo "OCTANS_PLAYER_RUNTIME_RELEASE_TITLE=${release_title}"
+            echo "OCTANS_PLAYER_RUNTIME_RELEASE_NOTES=${release_notes}"
+            echo "OCTANS_PLAYER_RUNTIME_RELEASE_PRERELEASE=false"
+            echo "OCTANS_PLAYER_RUNTIME_RELEASE_RECOVERY=${recovery}"
+          } >> "${GITHUB_ENV}"
+
+          printf 'Player runtime stable publish plan:\n'
+          printf '  revision: %s\n' "${revision}"
+          printf '  stable_version: %s\n' "${stable_version}"
+          printf '  recovery: %s\n' "${recovery}"
+          printf '  build_root: %s\n' "${build_root}"
+          printf '  source_cache: %s\n' "${source_cache}"
+          printf '  image_name: %s\n' "${image_name}"
+          printf '  release_tag: %s\n' "${release_tag}"
+          printf '  prerelease: false\n'
+          printf '  release_assets: %s\n' "${release_asset_dir}"
+
+      - name: Validate release token
+        env:
+          OCTANS_GITEA_RELEASE_TOKEN: ${{ secrets.OCTANS_GITEA_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${OCTANS_GITEA_RELEASE_TOKEN:-}" ]]; then
+            printf 'missing required secret: OCTANS_GITEA_REGISTRY_TOKEN\n' >&2
+            exit 1
+          fi
+
+          printf 'Gitea release token is present\n'
+
+      - name: Validate release prerequisites
+        run: |
+          set -euo pipefail
+
+          required_commands=(
+            curl
+            docker
+            git
+            jq
+            sha256sum
+            stat
+            zip
+          )
+
+          for command_name in "${required_commands[@]}"; do
+            if ! command -v "${command_name}" >/dev/null 2>&1; then
+              printf 'missing required command for release: %s\n' "${command_name}" >&2
+              exit 1
+            fi
+          done
+
+          if [[ -n "$(git status --porcelain)" ]]; then
+            printf 'refusing release from dirty worktree\n' >&2
+            git status --short >&2
+            exit 1
+          fi
+
+          printf 'release prerequisites are ready\n'
+
+      - name: Check stable release target
+        env:
+          OCTANS_GITEA_RELEASE_TOKEN: ${{ secrets.OCTANS_GITEA_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${OCTANS_PLAYER_RUNTIME_RELEASE_RECOVERY}" == "true" ]]; then
+            printf 'recovery mode enabled, release/tag checks are deferred to publish script\n'
+            exit 0
+          fi
+
+          api_base="${OCTANS_GITEA_URL%/}/api/v1/repos/${OCTANS_GITEA_REPOSITORY_OWNER}/${OCTANS_GITEA_REPOSITORY_NAME}"
+
+          response="$(mktemp)"
+          trap 'rm -f "${response}"' EXIT
+
+          release_status="$(
+            curl --silent --show-error \
+              --header "Authorization: token ${OCTANS_GITEA_RELEASE_TOKEN}" \
+              --output "${response}" \
+              --write-out '%{http_code}' \
+              "${api_base}/releases/tags/${OCTANS_PLAYER_RUNTIME_RELEASE_TAG}" \
+              || true
+          )"
+          if [[ "${release_status}" == "200" ]]; then
+            printf 'release already exists, refusing to overwrite: %s\n' "${OCTANS_PLAYER_RUNTIME_RELEASE_TAG}" >&2
+            exit 1
+          fi
+          if [[ "${release_status}" != "404" ]]; then
+            printf 'failed to check release, status=%s\n' "${release_status}" >&2
+            cat "${response}" >&2
+            exit 1
+          fi
+
+          tag_status="$(
+            curl --silent --show-error \
+              --header "Authorization: token ${OCTANS_GITEA_RELEASE_TOKEN}" \
+              --output "${response}" \
+              --write-out '%{http_code}' \
+              "${api_base}/tags/${OCTANS_PLAYER_RUNTIME_RELEASE_TAG}" \
+              || true
+          )"
+          if [[ "${tag_status}" == "200" ]]; then
+            printf 'release tag already exists, refusing to overwrite: %s\n' "${OCTANS_PLAYER_RUNTIME_RELEASE_TAG}" >&2
+            exit 1
+          fi
+          if [[ "${tag_status}" != "404" ]]; then
+            printf 'failed to check release tag, status=%s\n' "${tag_status}" >&2
+            cat "${response}" >&2
+            exit 1
+          fi
+
+          printf 'stable release target is new: %s\n' "${OCTANS_PLAYER_RUNTIME_RELEASE_TAG}"
+
+      - name: Build Windows x64 LGPL runtime
+        run: |
+          set -euo pipefail
+
+          OCTANS_RUNTIME_VERSION="${OCTANS_PLAYER_RUNTIME_BUILD_VERSION}" \
+          OCTANS_RUNTIME_SOURCE_CACHE="${OCTANS_PLAYER_RUNTIME_SOURCE_CACHE}" \
+          scripts/build-win64-lgpl-runtime.sh \
+            --image "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME}" \
+            --output-root "${OCTANS_PLAYER_RUNTIME_OUTPUT_ROOT}"
+
+      - name: Verify Windows x64 artifact
+        run: |
+          set -euo pipefail
+          scripts/verify-runtime-artifact.sh "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}"
+
+      - name: Generate stable release assets
+        run: |
+          set -euo pipefail
+
+          scripts/generate-win64-release-assets.sh \
+            --runtime-root "${OCTANS_PLAYER_RUNTIME_ARTIFACT_ROOT}" \
+            --version "${OCTANS_PLAYER_RUNTIME_BUILD_VERSION}" \
+            --channel stable \
+            --release-dir "${OCTANS_PLAYER_RUNTIME_RELEASE_ASSET_DIR}"
+
+      - name: Publish stable Gitea Release
+        env:
+          OCTANS_GITEA_RELEASE_TOKEN: ${{ secrets.OCTANS_GITEA_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          scripts/publish-gitea-release-assets.sh \
+            --owner "${OCTANS_GITEA_REPOSITORY_OWNER}" \
+            --repo "${OCTANS_GITEA_REPOSITORY_NAME}" \
+            --tag "${OCTANS_PLAYER_RUNTIME_RELEASE_TAG}" \
+            --title "${OCTANS_PLAYER_RUNTIME_RELEASE_TITLE}" \
+            --body-file "${OCTANS_PLAYER_RUNTIME_RELEASE_NOTES}" \
+            --asset-dir "${OCTANS_PLAYER_RUNTIME_RELEASE_ASSET_DIR}" \
+            --target "${GITHUB_SHA}" \
+            --prerelease "${OCTANS_PLAYER_RUNTIME_RELEASE_PRERELEASE}" \
+            --recovery "${OCTANS_PLAYER_RUNTIME_RELEASE_RECOVERY}"
+
+      - name: Report published artifacts
+        run: |
+          set -euo pipefail
+
+          printf 'Player runtime stable publish completed:\n'
+          printf '  release_tag: %s\n' "${OCTANS_PLAYER_RUNTIME_RELEASE_TAG}"
+          printf '  prerelease: %s\n' "${OCTANS_PLAYER_RUNTIME_RELEASE_PRERELEASE}"
+          printf '  release_assets: %s\n' "${OCTANS_PLAYER_RUNTIME_RELEASE_ASSET_DIR}"
+          find "${OCTANS_PLAYER_RUNTIME_RELEASE_ASSET_DIR}" \
+            -maxdepth 1 \
+            -type f \
+            -printf '    - %f\n' \
+            | sort
+
+      - name: Cleanup local Docker image
+        if: always()
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME:-}" ]]; then
+            docker image rm "${OCTANS_PLAYER_RUNTIME_IMAGE_NAME}" >/dev/null 2>&1 || true
+          fi

@@ -1,0 +1,88 @@
+{
+  "runtimeId": "octans-player-runtime-lgpl-media3-ffmpeg-decoder-android",
+  "artifactKind": "media3-ffmpeg-decoder",
+  "target": "android-media3-ffmpeg-decoder",
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a"
+  ],
+  "androidApi": 28,
+  "minSdk": 28,
+  "compileSdk": 36,
+  "licenseFlavor": "LGPL",
+  "toolchain": {
+    "gradle": {
+      "version": "9.4.1",
+      "sourceUrl": "https://services.gradle.org/distributions/gradle-9.4.1-bin.zip",
+      "sourceHash": {
+        "sha256": "2ab2958f2a1e51120c326cad6f385153bb11ee93b3c216c5fccebfdfbb7ec6cb"
+      }
+    },
+    "androidGradlePlugin": {
+      "version": "9.2.0"
+    },
+    "androidCommandLineTools": {
+      "version": "13114758",
+      "sourceUrl": "https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip",
+      "sourceHash": {
+        "sha256": "7ec965280a073311c339e571cd5de778b9975026cfcbe79f2b1cdcb1e15317ee"
+      }
+    },
+    "androidNdk": {
+      "version": "29.0.14206865",
+      "ref": "r29",
+      "sourceUrl": "https://dl.google.com/android/repository/android-ndk-r29-linux.zip",
+      "sourceHash": {
+        "sha1": "87e2bb7e9be5d6a1c6cdf5ec40dd4e0c6d07c30b"
+      }
+    },
+    "cmake": {
+      "version": "3.22.1"
+    }
+  },
+  "media3": {
+    "dependencyVersion": "1.10.1",
+    "sourceUrl": "https://github.com/androidx/media.git",
+    "sourceBranch": "release",
+    "sourceCommit": "5fb306449733dd71595700c1227ad6087578c559",
+    "copiedModule": "libraries/decoder_ffmpeg",
+    "excludedSources": [
+      "src/main/java/androidx/media3/decoder/ffmpeg/ExperimentalFfmpegVideoRenderer.java"
+    ],
+    "license": "Apache-2.0"
+  },
+  "ffmpeg": {
+    "sourceUrl": "https://git.ffmpeg.org/ffmpeg.git",
+    "githubMirrorUrl": "https://github.com/FFmpeg/FFmpeg.git",
+    "branch": "release/6.0",
+    "commit": "32291d4ac3fae922591cee11b82318d8d3857be2",
+    "enabledDecoders": [
+      "aac",
+      "ac3",
+      "eac3",
+      "dca",
+      "truehd",
+      "flac",
+      "opus",
+      "vorbis",
+      "mp3"
+    ],
+    "enabledFilters": [
+      "abuffer",
+      "abuffersink",
+      "aformat",
+      "pan",
+      "dynaudnorm",
+      "aresample"
+    ],
+    "configurePolicy": {
+      "enabledGpl": false,
+      "enabledNonfree": false,
+      "enabledPrograms": false,
+      "enabledShared": false,
+      "enabledStatic": true,
+      "enabledMuxersDemuxersProtocols": false,
+      "enabledFiltersAreWhitelisted": true
+    }
+  }
+}

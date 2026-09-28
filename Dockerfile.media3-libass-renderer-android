@@ -1,0 +1,48 @@
+FROM ubuntu:26.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    OCTANS_RUNTIME_ROOT=/workspace \
+    OCTANS_RUNTIME_OUTPUT=/dist \
+    OCTANS_RUNTIME_SOURCE_CACHE=/cache/sources \
+    OCTANS_ANDROID_SDK_ROOT=/cache/android-sdk \
+    GRADLE_USER_HOME=/cache/gradle
+
+RUN apt-get update \
+ && apt-get dist-upgrade -y \
+ && apt-get install -y --no-install-recommends \
+    autoconf \
+    automake \
+    autopoint \
+    bash \
+    binutils \
+    build-essential \
+    ca-certificates \
+    cmake \
+    curl \
+    file \
+    gettext \
+    git \
+    gperf \
+    jq \
+    libtool \
+    make \
+    ninja-build \
+    openjdk-21-jdk-headless \
+    patch \
+    pkg-config \
+    python3 \
+    tar \
+    unzip \
+    xz-utils \
+    zip \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+COPY build-manifests/ /workspace/build-manifests/
+COPY scripts/container/ /workspace/scripts/container/
+COPY scripts/patches/libass-android/ /workspace/scripts/patches/libass-android/
+COPY scripts/verify-media3-libass-renderer-artifact.sh /workspace/scripts/verify-media3-libass-renderer-artifact.sh
+
+ENTRYPOINT ["/workspace/scripts/container/build-media3-libass-renderer-android.sh"]

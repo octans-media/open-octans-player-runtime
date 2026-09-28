@@ -1,0 +1,42 @@
+diff --git a/lib_ass_media/src/main/java/io/github/peerless2012/ass/media/extractor/AssMatroskaExtractor.kt b/lib_ass_media/src/main/java/io/github/peerless2012/ass/media/extractor/AssMatroskaExtractor.kt
+index b195292..093746e 100644
+--- a/lib_ass_media/src/main/java/io/github/peerless2012/ass/media/extractor/AssMatroskaExtractor.kt
++++ b/lib_ass_media/src/main/java/io/github/peerless2012/ass/media/extractor/AssMatroskaExtractor.kt
+@@ -83,9 +83,9 @@ open class AssMatroskaExtractor(
+         when (id) {
+             ID_FILE_DATA -> {
+                 val attachmentName = requireNotNull(currentAttachmentName)
+-                val attachmentMime = requireNotNull(currentAttachmentMime)
++                val attachmentMime = currentAttachmentMime
+
+-                if (attachmentMime in fontMimeTypes) {
++                if (isFontAttachment(attachmentName, attachmentMime)) {
+                     val data = ByteArray(contentSize)
+                     input.readFully(data, 0, contentSize)
+                     assHandler.addFont(attachmentName, data)
+@@ -111,6 +111,11 @@ open class AssMatroskaExtractor(
+         const val ID_FILE_MIME_TYPE = 0x4660
+         const val ID_FILE_DATA = 0x465C
+
++        private fun isFontAttachment(name: String, mimeType: String?): Boolean {
++            if (mimeType in fontMimeTypes) return true
++            return name.substringAfterLast('.', "").lowercase() in fontFileExtensions
++        }
++
+         val fontMimeTypes = listOf(
+             "font/ttf",
+             "font/otf",
+@@ -124,6 +129,13 @@ open class AssMatroskaExtractor(
+             "application/x-font-ttf",
+         )
+
++        val fontFileExtensions = listOf(
++            "ttf",
++            "ttc",
++            "otf",
++            "otc",
++        )
++
+         val extractorOutput = MatroskaExtractor::class.java.getDeclaredField("extractorOutput").apply {
+             isAccessible = true
+         }

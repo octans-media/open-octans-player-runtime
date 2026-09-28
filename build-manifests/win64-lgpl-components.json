@@ -1,0 +1,141 @@
+{
+  "runtimeId": "octans-player-runtime-lgpl-win64",
+  "target": "win-x64",
+  "licenseFlavor": "LGPL",
+  "components": [
+    {
+      "name": "mpv",
+      "version": "0.41.0",
+      "ref": "v0.41.0",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/mpv-player/mpv"
+    },
+    {
+      "name": "ffmpeg",
+      "version": "8.1.1",
+      "ref": "ffmpeg-8.1.1",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://ffmpeg.org/releases/ffmpeg-8.1.1.tar.xz"
+    },
+    {
+      "name": "libplacebo",
+      "version": "7.360.1",
+      "ref": "v7.360.1",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/haasn/libplacebo.git"
+    },
+    {
+      "name": "libass",
+      "version": "0.17.4",
+      "ref": "0.17.4",
+      "license": "ISC",
+      "sourceUrl": "https://github.com/libass/libass"
+    },
+    {
+      "name": "freetype2",
+      "version": "2.14.3",
+      "ref": "2.14.3",
+      "license": "FTL",
+      "sourceUrl": "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.3.tar.xz"
+    },
+    {
+      "name": "fribidi",
+      "version": "1.0.16",
+      "ref": "v1.0.16",
+      "license": "LGPL-2.1-or-later",
+      "sourceUrl": "https://github.com/fribidi/fribidi/releases/download/v1.0.16/fribidi-1.0.16.tar.xz"
+    },
+    {
+      "name": "harfbuzz",
+      "version": "13.0.1",
+      "ref": "13.0.1",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/harfbuzz/harfbuzz/releases/download/13.0.1/harfbuzz-13.0.1.tar.xz"
+    },
+    {
+      "name": "libpng",
+      "version": "1.6.58",
+      "ref": "v1.6.58",
+      "license": "libpng-2.0",
+      "sourceUrl": "https://github.com/pnggroup/libpng/archive/v1.6.58.tar.gz"
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.2",
+      "ref": "v1.3.2",
+      "license": "Zlib",
+      "sourceUrl": "https://zlib.net/zlib-1.3.2.tar.xz"
+    },
+    {
+      "name": "dav1d",
+      "version": "1.5.3",
+      "ref": "1.5.3",
+      "license": "BSD-2-Clause",
+      "sourceUrl": "https://code.videolan.org/videolan/dav1d.git"
+    },
+    {
+      "name": "zimg",
+      "version": "3.0.6",
+      "ref": "release-3.0.6",
+      "license": "WTFPL",
+      "sourceUrl": "https://github.com/sekrit-twc/zimg.git"
+    },
+    {
+      "name": "lcms2",
+      "version": "2.19.1",
+      "ref": "lcms2.19.1",
+      "license": "MIT",
+      "sourceUrl": "https://github.com/mm2/Little-CMS.git"
+    },
+    {
+      "name": "vulkan-headers",
+      "version": "1.4.352",
+      "ref": "v1.4.352",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers.git"
+    },
+    {
+      "name": "vulkan-loader",
+      "version": "1.4.352",
+      "ref": "v1.4.352",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Loader.git"
+    },
+    {
+      "name": "spirv-cross",
+      "version": "1.4.350.0",
+      "ref": "vulkan-sdk-1.4.350.0",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/KhronosGroup/SPIRV-Cross.git"
+    },
+    {
+      "name": "shaderc",
+      "version": "2026.2",
+      "ref": "v2026.2",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/google/shaderc.git"
+    },
+    {
+      "name": "mingw-w64-gcc-runtime",
+      "version": "13-win32",
+      "ref": "gcc-mingw-w64-x86-64-win32-runtime",
+      "license": "GPL-3.0-or-later WITH GCC-exception-3.1",
+      "sourceUrl": "https://gcc.gnu.org/git/?p=gcc.git"
+    }
+  ],
+  "forbidden": [
+    "--enable-gpl",
+    "--enable-nonfree",
+    "--enable-libx264",
+    "--enable-libx265",
+    "--enable-libfdk-aac",
+    "--enable-openssl",
+    "libx264",
+    "libx265",
+    "libfdk_aac",
+    "GPL-only",
+    "AGPL",
+    "nonfree",
+    "proprietary"
+  ]
+}

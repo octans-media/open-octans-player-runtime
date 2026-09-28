@@ -1,0 +1,28 @@
+diff --git a/lib_ass/build.gradle.kts b/lib_ass/build.gradle.kts
+index ecd7520..5979902 100644
+--- a/lib_ass/build.gradle.kts
++++ b/lib_ass/build.gradle.kts
+@@ -15,6 +15,9 @@ android {
+         minSdk = 21
+         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+         consumerProguardFiles("consumer-rules.pro")
++        ndk {
++            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
++        }
+         externalNativeBuild {
+             cmake {
+                 arguments += listOf("-DANDROID_STL=c++_shared")
+diff --git a/lib_ass_kt/build.gradle.kts b/lib_ass_kt/build.gradle.kts
+index bbb834e..b6a30ad 100644
+--- a/lib_ass_kt/build.gradle.kts
++++ b/lib_ass_kt/build.gradle.kts
+@@ -15,6 +15,9 @@ android {
+         minSdk = 21
+         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+         consumerProguardFiles("consumer-rules.pro")
++        ndk {
++            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
++        }
+         externalNativeBuild {
+             cmake {
+                 arguments += listOf("-DANDROID_STL=c++_shared")

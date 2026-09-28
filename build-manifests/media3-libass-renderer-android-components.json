@@ -1,0 +1,115 @@
+{
+  "runtimeId": "octans-player-runtime-lgpl-media3-libass-renderer-android",
+  "artifactKind": "media3-libass-renderer",
+  "target": "android-media3-libass-renderer",
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a"
+  ],
+  "androidApi": 21,
+  "minSdk": 21,
+  "compileSdk": 36,
+  "licenseFlavor": "LGPL",
+  "toolchain": {
+    "gradleWrapper": {
+      "version": "8.14.2",
+      "distributionUrl": "https://services.gradle.org/distributions/gradle-8.14.2-all.zip"
+    },
+    "androidGradlePlugin": {
+      "version": "8.13.1"
+    },
+    "kotlin": {
+      "version": "2.2.0"
+    },
+    "androidCommandLineTools": {
+      "version": "13114758",
+      "sourceUrl": "https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip",
+      "sourceHash": {
+        "sha256": "7ec965280a073311c339e571cd5de778b9975026cfcbe79f2b1cdcb1e15317ee"
+      }
+    },
+    "androidNdk": {
+      "version": "28.1.13356709",
+      "ref": "r28c"
+    },
+    "cmake": {
+      "version": "3.22.1"
+    }
+  },
+  "libassAndroid": {
+    "sourceUrl": "https://github.com/peerless2012/libass-android.git",
+    "tag": "v0.5.0-beta01",
+    "tagObject": "629a7c75a9be925c30c4b4b760f95eb7e3481964",
+    "commit": "07b447fabceee6a0811e58652a468bb4b5429163",
+    "license": "MIT",
+    "modules": [
+      "lib_ass",
+      "lib_ass_kt",
+      "lib_ass_media"
+    ],
+    "outputAars": [
+      "aar/lib_ass_kt-release.aar",
+      "aar/lib_ass_media-release.aar"
+    ],
+    "patchSet": [
+      "scripts/patches/libass-android/0001-rename-native-libraries.patch",
+      "scripts/patches/libass-android/0002-limit-packaged-abis.patch",
+      "scripts/patches/libass-android/0003-remove-duplicate-cxx-runtime.patch",
+      "scripts/patches/libass-android/0004-record-octans-artifact-metadata.patch",
+      "scripts/patches/libass-android/0005-fix-android-cross-configure-env.patch",
+      "scripts/patches/libass-android/0006-configure-android-system-fontconfig.patch",
+      "scripts/patches/libass-android/0007-align-mkv-font-attachment-detection.patch"
+    ],
+    "ownershipPolicy": {
+      "rendererSharedLibrary": "liboctans_ass_renderer.so",
+      "jniSharedLibrary": "liboctans_ass_renderer_jni.so",
+      "forbiddenSharedLibraries": [
+        "libass.so",
+        "libasskt.so",
+        "libc++_shared.so"
+      ],
+      "fontStrategy": "Expose configureFonts/nativeAssRenderInit fontconfig hooks so Android can pass system fontconfig paths and avoid bundling Noto fallback fonts."
+    }
+  },
+  "media3": {
+    "dependencyVersion": "1.8.0",
+    "license": "Apache-2.0"
+  },
+  "nativeComponents": [
+    {
+      "name": "libass",
+      "commit": "bbb3c7f1570a4a021e52683f3fbdf74fe492ae84",
+      "license": "ISC"
+    },
+    {
+      "name": "expat",
+      "commit": "f9a3eeb3e09fbea04b1c451ffc422ab2f1e45744",
+      "license": "MIT"
+    },
+    {
+      "name": "fontconfig",
+      "commit": "daa175d234b8a362eedd4c18c33537cc2d19cd98",
+      "license": "MIT"
+    },
+    {
+      "name": "freetype",
+      "commit": "42608f77f20749dd6ddc9e0536788eaad70ea4b5",
+      "license": "FreeType License or GPL-2.0-only"
+    },
+    {
+      "name": "fribidi",
+      "commit": "68162babff4f39c4e2dc164a5e825af93bda9983",
+      "license": "LGPL-2.1-or-later"
+    },
+    {
+      "name": "harfbuzz",
+      "commit": "c3fcbffa651cea70400552f2a8bd695ad11023c1",
+      "license": "MIT"
+    },
+    {
+      "name": "libunibreak",
+      "commit": "304585d8e2d63187507368d612c3d5fff1486368",
+      "license": "Zlib"
+    }
+  ]
+}

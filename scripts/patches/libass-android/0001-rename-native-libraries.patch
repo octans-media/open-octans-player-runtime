@@ -1,0 +1,63 @@
+diff --git a/lib_ass/build.gradle.kts b/lib_ass/build.gradle.kts
+index 6a8bb94..ecd7520 100644
+--- a/lib_ass/build.gradle.kts
++++ b/lib_ass/build.gradle.kts
+@@ -60,7 +60,7 @@ android {
+     }
+
+     prefab {
+-        create("ass") {
++        create("octans_ass_renderer") {
+             headers = "src/main/cpp/include"
+         }
+     }
+diff --git a/lib_ass/src/main/cpp/CMakeLists.txt b/lib_ass/src/main/cpp/CMakeLists.txt
+index 374dcb3..00312c8 100644
+--- a/lib_ass/src/main/cpp/CMakeLists.txt
++++ b/lib_ass/src/main/cpp/CMakeLists.txt
+@@ -12,7 +12,7 @@ add_subdirectory(libass-cmake)
+ # Since this is the top level CMakeLists.txt, the project name is also accessible
+ # with ${CMAKE_PROJECT_NAME} (both CMake variables are in-sync within the top level
+ # build script scope).
+-project("ass")
++project("octans_ass_renderer")
+ # Creates and names a library, sets it as either STATIC
+ # or SHARED, and provides the relative paths to its source code.
+ # You can define multiple libraries, and CMake builds them for you.
+@@ -29,7 +29,6 @@ include_directories(${CMAKE_BINARY_DIR}/include)
+ # used in the AndroidManifest.xml file.
+ add_library(${CMAKE_PROJECT_NAME} SHARED Ass.c)
+ add_dependencies(${CMAKE_PROJECT_NAME} ep_ass)
+-#set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME "ass")
+ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/include)
+ target_link_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/lib)
+ target_link_libraries(${CMAKE_PROJECT_NAME}
+diff --git a/lib_ass_kt/src/main/cpp/CMakeLists.txt b/lib_ass_kt/src/main/cpp/CMakeLists.txt
+index da87fac..2cf23e7 100644
+--- a/lib_ass_kt/src/main/cpp/CMakeLists.txt
++++ b/lib_ass_kt/src/main/cpp/CMakeLists.txt
+@@ -27,9 +27,9 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
+ add_library(${CMAKE_PROJECT_NAME} SHARED AssKt.c)
+ # Add these two lines.
+ find_package(lib_ass REQUIRED CONFIG)
+-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME "asskt")
++set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME "octans_ass_renderer_jni")
+ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
+-        lib_ass::ass
++        lib_ass::octans_ass_renderer
+         android
+         jnigraphics
+         GLESv2
+diff --git a/lib_ass_kt/src/main/java/io/github/peerless2012/ass/Ass.kt b/lib_ass_kt/src/main/java/io/github/peerless2012/ass/Ass.kt
+index bcc56a6..dc9ca9c 100644
+--- a/lib_ass_kt/src/main/java/io/github/peerless2012/ass/Ass.kt
++++ b/lib_ass_kt/src/main/java/io/github/peerless2012/ass/Ass.kt
+@@ -15,7 +15,7 @@ class Ass {
+     companion object {
+
+         init {
+-            System.loadLibrary("asskt")
++            System.loadLibrary("octans_ass_renderer_jni")
+         }
+
+         @JvmStatic
