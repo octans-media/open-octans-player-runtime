@@ -25,12 +25,13 @@ android_arch="aarch64"
 android_host="aarch64-linux-android"
 android_cpu="armv8-a"
 
-ffmpeg_version="8.1.1"
-ffmpeg_sha256="b6863adde98898f42602017462871b5f6333e65aec803fdd7a6308639c52edf3"
-mpv_version="0.41.0"
-mpv_sha256="ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209"
-libplacebo_ref="v7.360.1"
-libplacebo_commit="cee9b076f2c63104ccfd497fa79c39a867293ec4"
+ffmpeg_version="9.0.2"
+ffmpeg_sha256="8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e"
+mpv_commit="413ff0b1cd4585294803308a1a14be2fad30cede"
+mpv_version="v0.41.0-g${mpv_commit:0:8}"
+mpv_sha256="dfdb212608e0ef75f42e0867178cf29350fc25b02ace20227e546bd060d37a70"
+libplacebo_commit="92b5ac6db79f4d680eb656692f7bf51e9606f42a"
+libplacebo_ref="${libplacebo_commit}"
 libass_ref="0.17.4"
 libass_commit="bbb3c7f1570a4a021e52683f3fbdf74fe492ae84"
 freetype2_version="2.14.3"
@@ -193,6 +194,19 @@ git_clone_once() {
     local ref="$2"
     local destination="$3"
     local recurse="${4:-0}"
+
+    if [[ "${ref}" =~ ^[0-9a-f]{40}$ ]]; then
+        rm -rf "${destination}"
+        mkdir -p "${destination}"
+        git -C "${destination}" init
+        git -C "${destination}" remote add origin "${url}"
+        git -C "${destination}" fetch --depth 1 origin "${ref}"
+        git -C "${destination}" checkout --detach FETCH_HEAD
+        if [[ "${recurse}" == "1" ]]; then
+            git -C "${destination}" submodule update --init --recursive --depth 1
+        fi
+        return
+    fi
 
     local args=(
         --depth 1
@@ -512,7 +526,7 @@ cmake_android_common=(
 )
 
 ffmpeg_tarball="${source_cache}/ffmpeg-${ffmpeg_version}.tar.xz"
-mpv_tarball="${source_cache}/mpv-v${mpv_version}.tar.gz"
+mpv_tarball="${source_cache}/mpv-${mpv_commit}.tar.gz"
 zlib_tarball="${source_cache}/zlib-${zlib_version}.tar.xz"
 libpng_tarball="${source_cache}/libpng-${libpng_version}.tar.gz"
 freetype_tarball="${source_cache}/freetype-${freetype2_version}.tar.xz"
@@ -523,7 +537,7 @@ libxml2_tarball="${source_cache}/libxml2-${libxml2_version}.tar.xz"
 fontconfig_tarball="${source_cache}/fontconfig-${fontconfig_version}.tar.xz"
 
 download "https://ffmpeg.org/releases/ffmpeg-${ffmpeg_version}.tar.xz" "${ffmpeg_tarball}"
-download "https://github.com/mpv-player/mpv/archive/refs/tags/v${mpv_version}.tar.gz" "${mpv_tarball}"
+download "https://github.com/mpv-player/mpv/archive/${mpv_commit}.tar.gz" "${mpv_tarball}"
 download "https://zlib.net/zlib-${zlib_version}.tar.xz" "${zlib_tarball}"
 download "https://github.com/pnggroup/libpng/archive/v${libpng_version}.tar.gz" "${libpng_tarball}"
 download "https://download.savannah.gnu.org/releases/freetype/freetype-${freetype2_version}.tar.xz" "${freetype_tarball}"
@@ -562,7 +576,7 @@ cp "${libxml2_tarball}" "${artifact_root}/sources/"
 cp "${fontconfig_tarball}" "${artifact_root}/sources/"
 
 ffmpeg_source="${source_root}/ffmpeg-${ffmpeg_version}"
-mpv_source="${source_root}/mpv-v${mpv_version}"
+mpv_source="${source_root}/mpv-${mpv_commit}"
 zlib_source="${source_root}/zlib-${zlib_version}"
 libpng_source="${source_root}/libpng-${libpng_version}"
 freetype_source="${source_root}/freetype-${freetype2_version}"
@@ -574,6 +588,13 @@ fontconfig_source="${source_root}/fontconfig-${fontconfig_version}"
 
 extract_tarball "${ffmpeg_tarball}" "${ffmpeg_source}"
 extract_tarball "${mpv_tarball}" "${mpv_source}"
+if [[ ! -f "${mpv_source}/demux/dovi_split.c" || ! -f "${mpv_source}/filters/f_enhancement_pair.c" ]]; then
+    echo "mpv ${mpv_commit} is missing the Profile 7 FEL sources" >&2
+    exit 1
+fi
+# The GitHub archive has no .git, so mpv's vcs_tag falls back to
+# v${MPV_VERSION}. Drop UNKNOWN so that fallback is v0.41.0-g<commit>.
+printf '%s\n' "${mpv_version#v}" >"${mpv_source}/MPV_VERSION"
 extract_tarball "${zlib_tarball}" "${zlib_source}"
 extract_tarball "${libpng_tarball}" "${libpng_source}"
 extract_tarball "${freetype_tarball}" "${freetype_source}"
@@ -598,6 +619,10 @@ clone_cached_project \
     "${libplacebo_fallback_url}" \
     "${libplacebo_source}" \
     1
+if ! grep -q "enhancement_layer" "${libplacebo_source}/src/include/libplacebo/renderer.h"; then
+    echo "libplacebo ${libplacebo_commit} has no pl_frame.enhancement_layer" >&2
+    exit 1
+fi
 clone_cached_project \
     libass \
     "${libass_ref}" \

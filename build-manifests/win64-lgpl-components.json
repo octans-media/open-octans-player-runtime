@@ -5,22 +5,22 @@
   "components": [
     {
       "name": "mpv",
-      "version": "0.41.0",
-      "ref": "v0.41.0",
+      "version": "v0.41.0-g413ff0b1",
+      "ref": "413ff0b1cd4585294803308a1a14be2fad30cede",
       "license": "LGPL-2.1-or-later",
-      "sourceUrl": "https://github.com/mpv-player/mpv"
+      "sourceUrl": "https://github.com/mpv-player/mpv/archive/413ff0b1cd4585294803308a1a14be2fad30cede.tar.gz"
     },
     {
       "name": "ffmpeg",
-      "version": "8.1.1",
-      "ref": "ffmpeg-8.1.1",
+      "version": "9.0.2",
+      "ref": "n9.0.2",
       "license": "LGPL-2.1-or-later",
-      "sourceUrl": "https://ffmpeg.org/releases/ffmpeg-8.1.1.tar.xz"
+      "sourceUrl": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz"
     },
     {
       "name": "libplacebo",
-      "version": "7.360.1",
-      "ref": "v7.360.1",
+      "version": "92b5ac6db79f4d680eb656692f7bf51e9606f42a",
+      "ref": "92b5ac6db79f4d680eb656692f7bf51e9606f42a",
       "license": "LGPL-2.1-or-later",
       "sourceUrl": "https://github.com/haasn/libplacebo.git"
     },

@@ -15,9 +15,12 @@ source_cache="${OCTANS_RUNTIME_SOURCE_CACHE:-/cache/sources}"
 work_root="${OCTANS_RUNTIME_WORK_ROOT:-/tmp/octans-player-runtime-build}"
 verify_script="${OCTANS_RUNTIME_VERIFY_SCRIPT:-/workspace/scripts/verify-runtime-artifact.sh}"
 
-ffmpeg_version="8.1.1"
-mpv_version="0.41.0"
-libplacebo_ref="v7.360.1"
+ffmpeg_version="9.0.2"
+ffmpeg_sha256="8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e"
+mpv_commit="413ff0b1cd4585294803308a1a14be2fad30cede"
+mpv_version="v0.41.0-g${mpv_commit:0:8}"
+libplacebo_commit="92b5ac6db79f4d680eb656692f7bf51e9606f42a"
+libplacebo_ref="${libplacebo_commit}"
 libass_ref="0.17.4"
 freetype2_version="2.14.3"
 fribidi_version="1.0.16"
@@ -75,6 +78,32 @@ download() {
 
     mkdir -p "$(dirname "${output}")"
     curl -fL --retry 5 --retry-delay 2 "${url}" -o "${output}"
+}
+
+verify_sha256() {
+    local expected="$1"
+    local file="$2"
+    local actual
+
+    actual="$(sha256sum "${file}" | awk '{print $1}')"
+    if [[ "${actual}" != "${expected}" ]]; then
+        echo "sha256 mismatch for ${file}" >&2
+        echo "expected ${expected}" >&2
+        echo "actual   ${actual}" >&2
+        return 1
+    fi
+}
+
+download_verified() {
+    local url="$1"
+    local output="$2"
+    local expected="$3"
+
+    if [[ -f "${output}" ]] && ! verify_sha256 "${expected}" "${output}"; then
+        rm -f "${output}"
+    fi
+    download "${url}" "${output}"
+    verify_sha256 "${expected}" "${output}"
 }
 
 retry() {
@@ -139,6 +168,71 @@ clone_cached_project() {
         fi
         rm -rf "${cache_dir}"
         mv "${temp_dir}" "${cache_dir}"
+    fi
+
+    rm -rf "${destination}"
+    cp -a "${cache_dir}" "${destination}"
+}
+
+git_clone_commit_once() {
+    local url="$1"
+    local commit="$2"
+    local destination="$3"
+    local recurse="${4:-0}"
+    local actual
+
+    if [[ ! "${commit}" =~ ^[0-9a-f]{40}$ ]]; then
+        echo "Expected a 40-character commit, got: ${commit}" >&2
+        return 1
+    fi
+
+    rm -rf "${destination}"
+    mkdir -p "${destination}"
+    git -C "${destination}" init
+    git -C "${destination}" remote add origin "${url}"
+    git -C "${destination}" fetch --depth 1 origin "${commit}"
+    git -C "${destination}" checkout --detach FETCH_HEAD
+    actual="$(git -C "${destination}" rev-parse HEAD)"
+    if [[ "${actual}" != "${commit}" ]]; then
+        echo "Checked out ${actual}, expected ${commit}" >&2
+        return 1
+    fi
+    if [[ "${recurse}" == "1" ]]; then
+        git -C "${destination}" submodule update --init --recursive --depth 1
+    fi
+}
+
+clone_cached_commit() {
+    local name="$1"
+    local commit="$2"
+    local primary_url="$3"
+    local fallback_url="$4"
+    local destination="$5"
+    local recurse="${6:-0}"
+
+    local cache_dir="${source_cache}/${name}-${commit}"
+    local temp_dir="${cache_dir}.tmp"
+    local actual
+
+    if [[ ! -d "${cache_dir}/.git" ]]; then
+        rm -rf "${temp_dir}"
+        if ! retry "Clone ${name} commit from primary source" \
+            git_clone_commit_once "${primary_url}" "${commit}" "${temp_dir}" "${recurse}"; then
+            rm -rf "${temp_dir}"
+            if [[ -z "${fallback_url}" ]]; then
+                return 1
+            fi
+            retry "Clone ${name} commit from fallback source" \
+                git_clone_commit_once "${fallback_url}" "${commit}" "${temp_dir}" "${recurse}"
+        fi
+        rm -rf "${cache_dir}"
+        mv "${temp_dir}" "${cache_dir}"
+    fi
+
+    actual="$(git -C "${cache_dir}" rev-parse HEAD)"
+    if [[ "${actual}" != "${commit}" ]]; then
+        echo "Cached ${name} is ${actual}, expected ${commit}" >&2
+        return 1
     fi
 
     rm -rf "${destination}"
@@ -370,15 +464,15 @@ write_cross_file "${cross_file}"
 write_cmake_toolchain_file "${cmake_toolchain_file}"
 
 ffmpeg_tarball="${source_cache}/ffmpeg-${ffmpeg_version}.tar.xz"
-mpv_tarball="${source_cache}/mpv-v${mpv_version}.tar.gz"
+mpv_tarball="${source_cache}/mpv-${mpv_commit}.tar.gz"
 zlib_tarball="${source_cache}/zlib-${zlib_version}.tar.xz"
 libpng_tarball="${source_cache}/libpng-${libpng_version}.tar.gz"
 freetype_tarball="${source_cache}/freetype-${freetype2_version}.tar.xz"
 fribidi_tarball="${source_cache}/fribidi-${fribidi_version}.tar.xz"
 harfbuzz_tarball="${source_cache}/harfbuzz-${harfbuzz_version}.tar.xz"
 
-download "https://ffmpeg.org/releases/ffmpeg-${ffmpeg_version}.tar.xz" "${ffmpeg_tarball}"
-download "https://github.com/mpv-player/mpv/archive/refs/tags/v${mpv_version}.tar.gz" "${mpv_tarball}"
+download_verified "https://ffmpeg.org/releases/ffmpeg-${ffmpeg_version}.tar.xz" "${ffmpeg_tarball}" "${ffmpeg_sha256}"
+download "https://github.com/mpv-player/mpv/archive/${mpv_commit}.tar.gz" "${mpv_tarball}"
 download "https://zlib.net/zlib-${zlib_version}.tar.xz" "${zlib_tarball}"
 download "https://github.com/pnggroup/libpng/archive/v${libpng_version}.tar.gz" "${libpng_tarball}"
 download "https://download.savannah.gnu.org/releases/freetype/freetype-${freetype2_version}.tar.xz" "${freetype_tarball}"
@@ -394,7 +488,7 @@ cp "${fribidi_tarball}" "${artifact_root}/sources/"
 cp "${harfbuzz_tarball}" "${artifact_root}/sources/"
 
 ffmpeg_source="${source_root}/ffmpeg-${ffmpeg_version}"
-mpv_source="${source_root}/mpv-v${mpv_version}"
+mpv_source="${source_root}/mpv-${mpv_commit}"
 zlib_source="${source_root}/zlib-${zlib_version}"
 libpng_source="${source_root}/libpng-${libpng_version}"
 freetype_source="${source_root}/freetype-${freetype2_version}"
@@ -403,6 +497,13 @@ harfbuzz_source="${source_root}/harfbuzz-${harfbuzz_version}"
 
 extract_tarball "${ffmpeg_tarball}" "${ffmpeg_source}"
 extract_tarball "${mpv_tarball}" "${mpv_source}"
+if [[ ! -f "${mpv_source}/demux/dovi_split.c" || ! -f "${mpv_source}/filters/f_enhancement_pair.c" ]]; then
+    echo "mpv ${mpv_commit} is missing the Profile 7 FEL sources" >&2
+    exit 1
+fi
+# The GitHub archive has no .git, so mpv's vcs_tag falls back to
+# v${MPV_VERSION}. Drop UNKNOWN so that fallback is v0.41.0-g<commit>.
+printf '%s\n' "${mpv_version#v}" >"${mpv_source}/MPV_VERSION"
 extract_tarball "${zlib_tarball}" "${zlib_source}"
 extract_tarball "${libpng_tarball}" "${libpng_source}"
 extract_tarball "${freetype_tarball}" "${freetype_source}"
@@ -419,13 +520,17 @@ vulkan_loader_source="${source_root}/vulkan-loader-${vulkan_loader_ref}"
 spirv_cross_source="${source_root}/spirv-cross-${spirv_cross_ref}"
 shaderc_source="${source_root}/shaderc-${shaderc_ref}"
 
-clone_cached_project \
+clone_cached_commit \
     libplacebo \
-    "${libplacebo_ref}" \
+    "${libplacebo_commit}" \
     "${libplacebo_source_url}" \
     "${libplacebo_fallback_url}" \
     "${libplacebo_source}" \
     1
+if ! grep -q "enhancement_layer" "${libplacebo_source}/src/include/libplacebo/renderer.h"; then
+    echo "libplacebo ${libplacebo_commit} has no pl_frame.enhancement_layer" >&2
+    exit 1
+fi
 clone_cached_project \
     libass \
     "${libass_ref}" \

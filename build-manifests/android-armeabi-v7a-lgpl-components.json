@@ -19,34 +19,34 @@
   "components": [
     {
       "name": "mpv",
-      "version": "0.41.0",
-      "ref": "v0.41.0",
+      "version": "v0.41.0-g413ff0b1",
+      "ref": "413ff0b1cd4585294803308a1a14be2fad30cede",
       "license": "LGPL-2.1-or-later",
-      "sourceUrl": "https://github.com/mpv-player/mpv/archive/refs/tags/v0.41.0.tar.gz",
+      "sourceUrl": "https://github.com/mpv-player/mpv/archive/413ff0b1cd4585294803308a1a14be2fad30cede.tar.gz",
       "sourceHash": {
-        "sha256": "ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209"
+        "sha256": "dfdb212608e0ef75f42e0867178cf29350fc25b02ace20227e546bd060d37a70"
       },
       "purpose": "libmpv client API and Android playback core"
     },
     {
       "name": "ffmpeg",
-      "version": "8.1.1",
-      "ref": "ffmpeg-8.1.1",
+      "version": "9.0.2",
+      "ref": "n9.0.2",
       "license": "LGPL-3.0-or-later",
-      "sourceUrl": "https://ffmpeg.org/releases/ffmpeg-8.1.1.tar.xz",
+      "sourceUrl": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz",
       "sourceHash": {
-        "sha256": "b6863adde98898f42602017462871b5f6333e65aec803fdd7a6308639c52edf3"
+        "sha256": "8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e"
       },
       "purpose": "demux, decode, subtitle decode, MediaCodec/JNI integration and protocol stack"
     },
     {
       "name": "libplacebo",
-      "version": "7.360.1",
-      "ref": "v7.360.1",
+      "version": "92b5ac6db79f4d680eb656692f7bf51e9606f42a",
+      "ref": "92b5ac6db79f4d680eb656692f7bf51e9606f42a",
       "license": "LGPL-2.1-or-later",
       "sourceUrl": "https://github.com/haasn/libplacebo.git",
       "sourceHash": {
-        "commit": "cee9b076f2c63104ccfd497fa79c39a867293ec4"
+        "commit": "92b5ac6db79f4d680eb656692f7bf51e9606f42a"
       },
       "purpose": "gpu-next renderer, HDR tone mapping and Dolby Vision reshaping support without libdovi"
     },
