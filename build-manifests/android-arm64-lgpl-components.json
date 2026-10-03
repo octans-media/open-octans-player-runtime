@@ -191,6 +191,28 @@
         "commit": "3ce4bfa3129ff3738046a44a6db533d2ce25af2b"
       },
       "purpose": "Unicode line breaking support for libass ASS_FEATURE_WRAP_UNICODE"
+    },
+    {
+      "name": "vulkan-headers",
+      "version": "1.4.352",
+      "ref": "v1.4.352",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/KhronosGroup/Vulkan-Headers.git",
+      "sourceHash": {
+        "commit": "015e25c3c91b70eb1a754d36fb14c4ba6ad9b0b9"
+      },
+      "purpose": "Vulkan headers for libplacebo and mpv Android gpu-context=androidvk"
+    },
+    {
+      "name": "shaderc",
+      "version": "2026.2",
+      "ref": "v2026.2",
+      "license": "Apache-2.0",
+      "sourceUrl": "https://github.com/google/shaderc.git",
+      "sourceHash": {
+        "commit": "d5f08ae5c5a9a45165578445cbd0f9adf0223448"
+      },
+      "purpose": "Runtime SPIR-V shader compiler for libplacebo Vulkan on Android"
     }
   ],
   "forbidden": [

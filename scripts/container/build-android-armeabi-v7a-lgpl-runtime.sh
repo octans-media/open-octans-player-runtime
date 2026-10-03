@@ -73,6 +73,12 @@ dav1d_source_url="https://code.videolan.org/videolan/dav1d.git"
 zimg_source_url="https://github.com/sekrit-twc/zimg.git"
 lcms2_source_url="https://github.com/mm2/Little-CMS.git"
 libunibreak_source_url="https://github.com/adah1972/libunibreak.git"
+vulkan_headers_ref="v1.4.352"
+vulkan_headers_commit="015e25c3c91b70eb1a754d36fb14c4ba6ad9b0b9"
+vulkan_headers_source_url="https://github.com/KhronosGroup/Vulkan-Headers.git"
+shaderc_ref="v2026.2"
+shaderc_commit="d5f08ae5c5a9a45165578445cbd0f9adf0223448"
+shaderc_source_url="https://github.com/google/shaderc.git"
 
 deps_prefix="${work_root}/deps"
 artifact_root="${output_root}/${runtime_id}"
@@ -343,6 +349,11 @@ copy_dependency_licenses() {
     copy_first_existing_license "${artifact_root}/licenses/libxml2-Copyright" "${libxml2_source}/Copyright"
     copy_first_existing_license "${artifact_root}/licenses/fontconfig-COPYING" "${fontconfig_source}/COPYING"
     copy_first_existing_license "${artifact_root}/licenses/libunibreak-LICENCE" "${libunibreak_source}/LICENCE"
+    copy_first_existing_license \
+        "${artifact_root}/licenses/vulkan-headers-LICENSE.md" \
+        "${vulkan_headers_source}/LICENSE.md" \
+        "${vulkan_headers_source}/LICENSE.txt"
+    copy_first_existing_license "${artifact_root}/licenses/shaderc-LICENSE" "${shaderc_source}/LICENSE"
 }
 
 copy_ffmpeg_licenses() {
@@ -491,10 +502,11 @@ validate_libplacebo_meson_evidence() {
     require_recorded_literals \
         "libplacebo Meson setup" \
         "${setup_file}" \
-        "-Dvulkan=disabled" \
+        "-Dvulkan=enabled" \
+        "-Dvk-proc-addr=enabled" \
         "-Dopengl=enabled" \
         "-Dgl-proc-addr=enabled" \
-        "-Dshaderc=disabled" \
+        "-Dshaderc=enabled" \
         "-Dglslang=disabled" \
         "-Dlcms=enabled" \
         "-Dlibdovi=disabled"
@@ -502,8 +514,8 @@ validate_libplacebo_meson_evidence() {
     reject_recorded_literals \
         "libplacebo Meson setup" \
         "${setup_file}" \
-        "-Dvulkan=enabled" \
-        "-Dshaderc=enabled" \
+        "-Dvulkan=disabled" \
+        "-Dshaderc=disabled" \
         "-Dglslang=enabled" \
         "-Dlibdovi=enabled"
 
@@ -530,7 +542,7 @@ validate_mpv_meson_evidence() {
         "-Dandroid-media-ndk=enabled" \
         "-Dgl=enabled" \
         "-Dplain-gl=enabled" \
-        "-Dvulkan=disabled" \
+        "-Dvulkan=enabled" \
         "-Dshaderc=disabled" \
         "-Dspirv-cross=disabled" \
         "-Dlua=disabled" \
@@ -540,7 +552,7 @@ validate_mpv_meson_evidence() {
         "mpv Meson setup" \
         "${setup_file}" \
         "-Dgpl=true" \
-        "-Dvulkan=enabled" \
+        "-Dvulkan=disabled" \
         "-Dshaderc=enabled" \
         "-Dspirv-cross=enabled" \
         "-Dlua=enabled" \
@@ -557,7 +569,7 @@ is_android_system_so() {
     so_name="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
 
     case "${so_name}" in
-        ld-android.so|libaaudio.so|libandroid.so|libc.so|libdl.so|libegl.so|libgcc.so|libglesv1_cm.so|libglesv2.so|libglesv3.so|libjnigraphics.so|liblog.so|libm.so|libmediandk.so|libnativewindow.so|libopensles.so|libstdc++.so|libsync.so|libz.so)
+        ld-android.so|libaaudio.so|libandroid.so|libc.so|libdl.so|libegl.so|libgcc.so|libglesv1_cm.so|libglesv2.so|libglesv3.so|libjnigraphics.so|liblog.so|libm.so|libmediandk.so|libnativewindow.so|libopensles.so|libstdc++.so|libsync.so|libvulkan.so|libz.so)
             return 0
             ;;
     esac
@@ -1198,6 +1210,8 @@ dav1d_source="${source_root}/dav1d-${dav1d_ref}"
 zimg_source="${source_root}/zimg-${zimg_ref}"
 lcms2_source="${source_root}/lcms2-${lcms2_ref}"
 libunibreak_source="${source_root}/libunibreak-${libunibreak_ref}"
+vulkan_headers_source="${source_root}/vulkan-headers-${vulkan_headers_ref}"
+shaderc_source="${source_root}/shaderc-${shaderc_ref}"
 
 clone_cached_project \
     libplacebo \
@@ -1494,6 +1508,45 @@ meson_setup_compile_install \
     -Denable_tests=false
 copy_shared_objects_from_dir "${deps_prefix}/lib" "${artifact_root}/jniLibs/${android_abi}"
 
+clone_cached_project \
+    vulkan-headers \
+    "${vulkan_headers_ref}" \
+    "${vulkan_headers_commit}" \
+    "${vulkan_headers_source_url}" \
+    "" \
+    "${vulkan_headers_source}" \
+    0
+clone_cached_project \
+    shaderc \
+    "${shaderc_ref}" \
+    "${shaderc_commit}" \
+    "${shaderc_source_url}" \
+    "" \
+    "${shaderc_source}" \
+    0
+(
+    cd "${shaderc_source}"
+    ./utils/git-sync-deps
+)
+cmake_configure_build_install \
+    vulkan-headers \
+    "${vulkan_headers_source}" \
+    "${cmake_android_common[@]}"
+cmake_configure_build_install \
+    shaderc \
+    "${shaderc_source}" \
+    "${cmake_android_common[@]}" \
+    -DBUILD_SHARED_LIBS=ON \
+    "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--whole-archive ${compiler_rt_builtins} -Wl,--no-whole-archive" \
+    -DSHADERC_SKIP_TESTS=ON \
+    -DSHADERC_SKIP_EXAMPLES=ON \
+    -DSHADERC_SKIP_EXECUTABLES=ON \
+    -DSHADERC_SKIP_COPYRIGHT_CHECK=ON \
+    -DSHADERC_ENABLE_WGSL_OUTPUT=OFF \
+    -DSPIRV_SKIP_TESTS=ON \
+    -DSPIRV_TOOLS_BUILD_STATIC=OFF
+copy_shared_objects_from_dir "${deps_prefix}/lib" "${artifact_root}/jniLibs/${android_abi}"
+
 meson_setup_compile_install \
     libplacebo \
     "${libplacebo_source}" \
@@ -1504,10 +1557,11 @@ meson_setup_compile_install \
     --wrap-mode nodownload \
     -Ddemos=false \
     -Dtests=false \
-    -Dvulkan=disabled \
+    -Dvulkan=enabled \
+    -Dvk-proc-addr=enabled \
     -Dopengl=enabled \
     -Dgl-proc-addr=enabled \
-    -Dshaderc=disabled \
+    -Dshaderc=enabled \
     -Dglslang=disabled \
     -Dlcms=enabled \
     -Ddovi=enabled \
@@ -1596,7 +1650,8 @@ mpv_meson_setup=(
     -Dandroid-media-ndk=enabled
     -Dgl=enabled
     -Dplain-gl=enabled
-    -Dvulkan=disabled
+    -Dvulkan=enabled
+    # mpv 的 shaderc 选项被限制在 win32-desktop。Vulkan 着色器走 libplacebo。
     -Dshaderc=disabled
     -Dspirv-cross=disabled
     -Dlcms2=enabled
@@ -1669,6 +1724,7 @@ jq \
           version: (.components[] | select(.name == "mpv") | .version),
           mesonOptionsFile: $mpvMesonOptions
         },
+        vulkanIncluded: true,
         sha256sums: "build/sha256sums.txt",
         sbom: "build/sbom.spdx.json"
       }' \

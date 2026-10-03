@@ -130,7 +130,7 @@ is_android_system_so() {
     so_name="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
 
     case "${so_name}" in
-        ld-android.so|libaaudio.so|libandroid.so|libc.so|libdl.so|libegl.so|libgcc.so|libglesv1_cm.so|libglesv2.so|libglesv3.so|libjnigraphics.so|liblog.so|libm.so|libmediandk.so|libnativewindow.so|libopensles.so|libstdc++.so|libsync.so|libz.so)
+        ld-android.so|libaaudio.so|libandroid.so|libc.so|libdl.so|libegl.so|libgcc.so|libglesv1_cm.so|libglesv2.so|libglesv3.so|libjnigraphics.so|liblog.so|libm.so|libmediandk.so|libnativewindow.so|libopensles.so|libstdc++.so|libsync.so|libvulkan.so|libz.so)
             return 0
             ;;
     esac
@@ -438,10 +438,11 @@ check_required_text \
 check_required_text \
     "libplacebo setup gate" \
     "${libplacebo_setup}" \
-    "-Dvulkan=disabled" \
+    "-Dvulkan=enabled" \
+    "-Dvk-proc-addr=enabled" \
     "-Dopengl=enabled" \
     "-Dgl-proc-addr=enabled" \
-    "-Dshaderc=disabled" \
+    "-Dshaderc=enabled" \
     "-Dglslang=disabled" \
     "-Dlcms=enabled" \
     "-Dlibdovi=disabled"
@@ -449,10 +450,10 @@ check_required_text \
 check_required_text \
     "libplacebo options gate" \
     "${libplacebo_options}" \
-    "^[[:space:]]*vulkan[[:space:]]+disabled" \
+    "^[[:space:]]*vulkan[[:space:]]+enabled" \
     "^[[:space:]]*opengl[[:space:]]+enabled" \
     "^[[:space:]]*gl-proc-addr[[:space:]]+enabled" \
-    "^[[:space:]]*shaderc[[:space:]]+disabled" \
+    "^[[:space:]]*shaderc[[:space:]]+enabled" \
     "^[[:space:]]*glslang[[:space:]]+disabled" \
     "^[[:space:]]*lcms[[:space:]]+enabled" \
     "^[[:space:]]*libdovi[[:space:]]+disabled"
@@ -470,7 +471,7 @@ check_required_text \
     "-Dandroid-media-ndk=enabled" \
     "-Dgl=enabled" \
     "-Dplain-gl=enabled" \
-    "-Dvulkan=disabled" \
+    "-Dvulkan=enabled" \
     "-Dshaderc=disabled" \
     "-Dspirv-cross=disabled" \
     "-Dlua=disabled" \
@@ -489,7 +490,7 @@ check_required_text \
     "^[[:space:]]*android-media-ndk[[:space:]]+enabled" \
     "^[[:space:]]*gl[[:space:]]+enabled" \
     "^[[:space:]]*plain-gl[[:space:]]+enabled" \
-    "^[[:space:]]*vulkan[[:space:]]+disabled" \
+    "^[[:space:]]*vulkan[[:space:]]+enabled" \
     "^[[:space:]]*shaderc[[:space:]]+disabled" \
     "^[[:space:]]*spirv-cross[[:space:]]+disabled" \
     "^[[:space:]]*lua[[:space:]]+disabled" \

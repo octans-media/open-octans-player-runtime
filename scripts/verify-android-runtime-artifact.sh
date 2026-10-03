@@ -377,10 +377,11 @@ check_required_text \
 check_required_text \
     "libplacebo options gate" \
     "${libplacebo_options}" \
-    "-Dvulkan=disabled" \
+    "-Dvulkan=enabled" \
+    "-Dvk-proc-addr=enabled" \
     "-Dopengl=enabled" \
     "-Dgl-proc-addr=enabled" \
-    "-Dshaderc=disabled" \
+    "-Dshaderc=enabled" \
     "-Dglslang=disabled" \
     "-Dlcms=enabled" \
     "-Dlibdovi=disabled"
@@ -393,7 +394,7 @@ check_required_text \
     "^[[:space:]]*android-media-ndk[[:space:]]+enabled" \
     "^[[:space:]]*egl-android[[:space:]]+enabled" \
     "^[[:space:]]*gl[[:space:]]+enabled" \
-    "^[[:space:]]*vulkan[[:space:]]+disabled" \
+    "^[[:space:]]*vulkan[[:space:]]+enabled" \
     "^[[:space:]]*shaderc[[:space:]]+disabled" \
     "^[[:space:]]*spirv-cross[[:space:]]+disabled" \
     "^[[:space:]]*lcms2[[:space:]]+enabled" \
