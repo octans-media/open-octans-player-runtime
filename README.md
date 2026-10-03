@@ -20,6 +20,8 @@ The first three are `libmpv` runtimes. The Media3 FFmpeg decoder is one dual-ABI
 
 `armeabi-v7a` targets Android 9 / API 28 with NEON. It is not a general 32-bit Android build.
 
+The current stable libmpv release is `0.1.4` for win64, Android arm64, and `armeabi-v7a`. All three use mpv `v0.41.0-g413ff0b1` (`413ff0b1cd4585294803308a1a14be2fad30cede`), FFmpeg `9.0.2`, and libplacebo `92b5ac6db79f4d680eb656692f7bf51e9606f42a`. Android builds keep Vulkan and shaderc disabled. Media3 FFmpeg decoder `0.2.1` and libass renderer `0.1.1` are separate pins.
+
 ## Build
 
 The supported host is Ubuntu 26.04 amd64, with Docker.
