@@ -1,6 +1,8 @@
-# Octans Player Runtime
+# Octans Player Runtime Agent Guide
 
-This repository builds native playback artifacts for Octans clients. `libmpv` builds pass `-Dgpl=false`. FFmpeg builds do not pass `--enable-gpl` or `--enable-nonfree`, and they do not link `libx264`, `libx265`, or `libfdk-aac`.
+## Purpose
+
+This repository builds native playback artifacts for Octans Windows and Android clients. `libmpv` builds pass `-Dgpl=false`. FFmpeg builds do not pass `--enable-gpl` or `--enable-nonfree`, and they do not link `libx264`, `libx265`, or `libfdk-aac`. It does not build the client apps, the web UI, or the server FFmpeg runtime.
 
 ## Layout
 
@@ -22,4 +24,15 @@ This repository builds native playback artifacts for Octans clients. `libmpv` bu
 
 The other artifact entry points are listed in `README.md`. Build output stays under `dist/` and `.cache/` unless `OCTANS_RUNTIME_OUTPUT` or `OCTANS_RUNTIME_SOURCE_CACHE` is set. Do not commit `dist/`, `.cache/`, packages, or native binaries.
 
+## Publish
+
 `scripts/publish-gitea-release-assets.sh` requires `OCTANS_GITEA_URL`, `OCTANS_GITEA_REPOSITORY_OWNER`, and `OCTANS_GITEA_REPOSITORY_NAME`. It has no default registry address.
+
+## Agent notes
+
+- Push to `origin` only. Push to `github` only when the maintainer asks for a public source sync.
+- Consumers: Octans Windows and Android clients pin artifacts in their own `player-runtime.lock.json`.
+- License boundary: keep `libmpv` at `-Dgpl=false`. FFmpeg builds must not pass `--enable-gpl` or `--enable-nonfree`, or link `libx264`, `libx265`, or `libfdk-aac`.
+- Do not commit build output, packages, container images, or native binaries.
+- Do not write registry hosts, credentials, internal hostnames, or IP addresses into scripts, workflows, or docs.
+- When this checkout sits inside the Octans workspace, the workspace `AGENTS.md` one level up also applies.
