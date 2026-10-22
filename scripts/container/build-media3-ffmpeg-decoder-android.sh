@@ -21,8 +21,8 @@ verify_script="${OCTANS_RUNTIME_VERIFY_SCRIPT:-/workspace/scripts/verify-media3-
 component_manifest="${OCTANS_RUNTIME_MANIFEST:-/workspace/build-manifests/media3-ffmpeg-decoder-android-components.json}"
 
 media3_ref="release"
-media3_commit="5fb306449733dd71595700c1227ad6087578c559"
-media3_version="1.10.1"
+media3_commit="8c6678b657ede1e7883fc164ef73ed483c7796c3"
+media3_version="1.11.1"
 media3_source_url="https://github.com/androidx/media.git"
 
 ffmpeg_ref="release/6.0"
@@ -180,6 +180,12 @@ clone_cached_project() {
             fi
             retry "Clone ${name} from fallback source" \
                 git_clone_once "${fallback_url}" "${ref}" "${temp_dir}"
+        fi
+        local cloned_commit
+        cloned_commit="$(git -C "${temp_dir}" rev-parse HEAD)"
+        if [[ "${cloned_commit}" != "${expected_commit}" ]]; then
+            git -C "${temp_dir}" fetch --depth 1 origin "${expected_commit}"
+            git -C "${temp_dir}" checkout --detach FETCH_HEAD
         fi
         rm -rf "${cache_dir}"
         mv "${temp_dir}" "${cache_dir}"

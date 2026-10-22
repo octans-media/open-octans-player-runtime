@@ -194,7 +194,8 @@ for patch_name in \
     0004-record-octans-artifact-metadata.patch \
     0005-fix-android-cross-configure-env.patch \
     0006-configure-android-system-fontconfig.patch \
-    0007-align-mkv-font-attachment-detection.patch; do
+    0007-align-mkv-font-attachment-detection.patch \
+    0008-bump-media3-to-1.11.1.patch; do
     require_file "${artifact_root}/build/patches/${patch_name}"
     if grep -Fxq "${patch_name}" "${artifact_root}/build/patches-applied.txt" 2>/dev/null; then
         ok "patch applied ${patch_name}"
@@ -208,7 +209,7 @@ if [[ "${failures}" -eq 0 ]]; then
     check_manifest_field '.artifactKind' 'media3-libass-renderer'
     check_manifest_field '.target' 'android-media3-libass-renderer'
     check_manifest_field '.licenseFlavor' 'LGPL'
-    check_manifest_field '.libassAndroid.commit' '07b447fabceee6a0811e58652a468bb4b5429163'
+    check_manifest_field '.libassAndroid.commit' '504f64a325059ab5188c4c9d0eddc99c9356a23a'
     check_manifest_field '.libassAndroid.ownershipPolicy.rendererSharedLibrary' 'liboctans_ass_renderer.so'
     check_manifest_field '.libassAndroid.ownershipPolicy.jniSharedLibrary' 'liboctans_ass_renderer_jni.so'
 

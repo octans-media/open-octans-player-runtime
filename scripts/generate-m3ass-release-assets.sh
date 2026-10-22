@@ -11,7 +11,7 @@ release_dir=""
 runtime_id_expected="octans-player-runtime-lgpl-media3-libass-renderer-android"
 artifact_kind_expected="media3-libass-renderer"
 target_expected="android-media3-libass-renderer"
-libass_android_commit_expected="07b447fabceee6a0811e58652a468bb4b5429163"
+libass_android_commit_expected="504f64a325059ab5188c4c9d0eddc99c9356a23a"
 renderer_library_expected="liboctans_ass_renderer.so"
 jni_library_expected="liboctans_ass_renderer_jni.so"
 

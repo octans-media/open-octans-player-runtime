@@ -16,11 +16,11 @@ octans-player-runtime-lgpl-media3-ffmpeg-decoder-android
 octans-player-runtime-lgpl-media3-libass-renderer-android
 ```
 
-The first three are `libmpv` runtimes. The Media3 FFmpeg decoder is one dual-ABI AAR for `arm64-v8a` and `armeabi-v7a`. The Media3 libass renderer is a pair of dual-ABI AARs built from `libass-android` `v0.5.0-beta01` plus `scripts/patches/libass-android/`.
+The first three are `libmpv` runtimes. The Media3 FFmpeg decoder is one dual-ABI AAR for `arm64-v8a` and `armeabi-v7a`. The Media3 libass renderer is a pair of dual-ABI AARs built from `libass-android` `v0.5.1` plus `scripts/patches/libass-android/`.
 
 `armeabi-v7a` targets Android 9 / API 28 with NEON. It is not a general 32-bit Android build.
 
-The current stable libmpv release is `0.2.0` for win64, Android arm64, and `armeabi-v7a`. All three use mpv `v0.41.0-g413ff0b1` (`413ff0b1cd4585294803308a1a14be2fad30cede`), FFmpeg `9.0.2`, and libplacebo `92b5ac6db79f4d680eb656692f7bf51e9606f42a`. Android builds enable Vulkan. libplacebo uses shaderc; mpv's own shaderc option stays off because upstream only allows it on win32-desktop. Media3 FFmpeg decoder `0.2.1` and libass renderer `0.1.1` are separate pins.
+The current stable libmpv release is `0.2.0` for win64, Android arm64, and `armeabi-v7a`. All three use mpv `v0.41.0-g413ff0b1` (`413ff0b1cd4585294803308a1a14be2fad30cede`), FFmpeg `9.0.2`, and libplacebo `92b5ac6db79f4d680eb656692f7bf51e9606f42a`. Android builds enable Vulkan. libplacebo uses shaderc; mpv's own shaderc option stays off because upstream only allows it on win32-desktop. Media3 FFmpeg decoder `0.3.0` and libass renderer `0.3.0` are separate pins, both built against Media3 `1.11.1`.
 
 ## Build
 

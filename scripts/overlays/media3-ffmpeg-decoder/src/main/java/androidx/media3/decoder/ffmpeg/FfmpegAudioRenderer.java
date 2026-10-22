@@ -20,6 +20,7 @@ import static androidx.media3.exoplayer.audio.AudioSink.SINK_FORMAT_SUPPORTED_WI
 import static androidx.media3.exoplayer.audio.AudioSink.SINK_FORMAT_UNSUPPORTED;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import android.content.Context;
 import android.os.Handler;
 import androidx.annotation.Nullable;
 import androidx.media3.common.C;
@@ -50,8 +51,22 @@ public final class FfmpegAudioRenderer extends DecoderAudioRenderer<FfmpegAudioD
 
   private final FfmpegAudioProcessingOptions audioProcessingOptions;
 
+  /**
+   * @deprecated Use {@link #FfmpegAudioRenderer(Context)} instead.
+   */
+  @SuppressWarnings("deprecation") // Calling deprecated constructor.
+  @Deprecated
   public FfmpegAudioRenderer() {
     this(/* eventHandler= */ null, /* eventListener= */ null);
+  }
+
+  /**
+   * Creates a new instance.
+   *
+   * @param context A context.
+   */
+  public FfmpegAudioRenderer(Context context) {
+    this(context, /* eventHandler= */ null, /* eventListener= */ null);
   }
 
   /**
@@ -61,7 +76,11 @@ public final class FfmpegAudioRenderer extends DecoderAudioRenderer<FfmpegAudioD
    *     null if delivery of events is not required.
    * @param eventListener A listener of events. May be null if delivery of events is not required.
    * @param audioProcessors Optional {@link AudioProcessor}s that will process audio before output.
+   * @deprecated Use {@link #FfmpegAudioRenderer(Context, Handler, AudioRendererEventListener,
+   *     AudioProcessor...)} instead.
    */
+  @SuppressWarnings("deprecation") // Calling deprecated constructor.
+  @Deprecated
   public FfmpegAudioRenderer(
       @Nullable Handler eventHandler,
       @Nullable AudioRendererEventListener eventListener,
@@ -70,6 +89,26 @@ public final class FfmpegAudioRenderer extends DecoderAudioRenderer<FfmpegAudioD
         eventHandler,
         eventListener,
         new DefaultAudioSink.Builder().setAudioProcessors(audioProcessors).build());
+  }
+
+  /**
+   * Creates a new instance.
+   *
+   * @param context A context.
+   * @param eventHandler A handler to use when delivering events to {@code eventListener}. May be
+   *     null if delivery of events is not required.
+   * @param eventListener A listener of events. May be null if delivery of events is not required.
+   * @param audioProcessors Optional {@link AudioProcessor}s that will process audio before output.
+   */
+  public FfmpegAudioRenderer(
+      Context context,
+      @Nullable Handler eventHandler,
+      @Nullable AudioRendererEventListener eventListener,
+      AudioProcessor... audioProcessors) {
+    this(
+        eventHandler,
+        eventListener,
+        new DefaultAudioSink.Builder(context).setAudioProcessors(audioProcessors).build());
   }
 
   /**

@@ -21,9 +21,9 @@ verify_script="${OCTANS_RUNTIME_VERIFY_SCRIPT:-/workspace/scripts/verify-media3-
 component_manifest="${OCTANS_RUNTIME_MANIFEST:-/workspace/build-manifests/media3-libass-renderer-android-components.json}"
 patch_dir="${OCTANS_RUNTIME_PATCH_DIR:-/workspace/scripts/patches/libass-android}"
 
-libass_android_ref="v0.5.0-beta01"
-libass_android_tag_object="629a7c75a9be925c30c4b4b760f95eb7e3481964"
-libass_android_commit="07b447fabceee6a0811e58652a468bb4b5429163"
+libass_android_ref="v0.5.1"
+libass_android_tag_object="504f64a325059ab5188c4c9d0eddc99c9356a23a"
+libass_android_commit="504f64a325059ab5188c4c9d0eddc99c9356a23a"
 libass_android_source_url="https://github.com/peerless2012/libass-android.git"
 
 commandline_tools_version="13114758"
@@ -47,6 +47,7 @@ patches=(
     0005-fix-android-cross-configure-env.patch
     0006-configure-android-system-fontconfig.patch
     0007-align-mkv-font-attachment-detection.patch
+    0008-bump-media3-to-1.11.1.patch
 )
 
 require_command() {
@@ -225,6 +226,9 @@ install_android_sdk() {
 apply_octans_patches() {
     mkdir -p "${artifact_root}/build/patches"
     : >"${artifact_root}/build/patches-applied.txt"
+
+    # v0.5.1 ships this CMake file with CRLF. The Octans patches are LF.
+    sed -i 's/\r$//' "${libass_source}/lib_ass_kt/src/main/cpp/CMakeLists.txt"
 
     local patch_name
     for patch_name in "${patches[@]}"; do

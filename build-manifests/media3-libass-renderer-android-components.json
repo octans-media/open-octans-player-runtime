@@ -38,9 +38,9 @@
   },
   "libassAndroid": {
     "sourceUrl": "https://github.com/peerless2012/libass-android.git",
-    "tag": "v0.5.0-beta01",
-    "tagObject": "629a7c75a9be925c30c4b4b760f95eb7e3481964",
-    "commit": "07b447fabceee6a0811e58652a468bb4b5429163",
+    "tag": "v0.5.1",
+    "tagObject": "504f64a325059ab5188c4c9d0eddc99c9356a23a",
+    "commit": "504f64a325059ab5188c4c9d0eddc99c9356a23a",
     "license": "MIT",
     "modules": [
       "lib_ass",
@@ -58,7 +58,8 @@
       "scripts/patches/libass-android/0004-record-octans-artifact-metadata.patch",
       "scripts/patches/libass-android/0005-fix-android-cross-configure-env.patch",
       "scripts/patches/libass-android/0006-configure-android-system-fontconfig.patch",
-      "scripts/patches/libass-android/0007-align-mkv-font-attachment-detection.patch"
+      "scripts/patches/libass-android/0007-align-mkv-font-attachment-detection.patch",
+      "scripts/patches/libass-android/0008-bump-media3-to-1.11.1.patch"
     ],
     "ownershipPolicy": {
       "rendererSharedLibrary": "liboctans_ass_renderer.so",
@@ -72,7 +73,7 @@
     }
   },
   "media3": {
-    "dependencyVersion": "1.8.0",
+    "dependencyVersion": "1.11.1",
     "license": "Apache-2.0"
   },
   "nativeComponents": [

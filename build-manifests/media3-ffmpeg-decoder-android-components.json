@@ -41,10 +41,10 @@
     }
   },
   "media3": {
-    "dependencyVersion": "1.10.1",
+    "dependencyVersion": "1.11.1",
     "sourceUrl": "https://github.com/androidx/media.git",
     "sourceBranch": "release",
-    "sourceCommit": "5fb306449733dd71595700c1227ad6087578c559",
+    "sourceCommit": "8c6678b657ede1e7883fc164ef73ed483c7796c3",
     "copiedModule": "libraries/decoder_ffmpeg",
     "excludedSources": [
       "src/main/java/androidx/media3/decoder/ffmpeg/ExperimentalFfmpegVideoRenderer.java"
