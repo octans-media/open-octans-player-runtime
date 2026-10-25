@@ -51,23 +51,23 @@
     },
     {
       "name": "libass",
-      "version": "0.17.4",
-      "ref": "0.17.4",
+      "version": "0.17.5",
+      "ref": "0.17.5",
       "license": "ISC",
       "sourceUrl": "https://github.com/libass/libass.git",
       "sourceHash": {
-        "commit": "bbb3c7f1570a4a021e52683f3fbdf74fe492ae84"
+        "commit": "4a05d8127f525943ebf45fdc6497c9e665947f0d"
       },
       "purpose": "ASS / SSA subtitle rendering"
     },
     {
       "name": "freetype2",
-      "version": "2.14.3",
-      "ref": "2.14.3",
+      "version": "2.15.0",
+      "ref": "2.15.0",
       "license": "FTL",
-      "sourceUrl": "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.3.tar.xz",
+      "sourceUrl": "https://download.savannah.gnu.org/releases/freetype/freetype-2.15.0.tar.xz",
       "sourceHash": {
-        "sha256": "36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f"
+        "sha256": "93cd47eb719c325107f2d3cf087d06299e944c3b48a40b55537302304dea1dd5"
       },
       "purpose": "font rasterization for libass subtitles"
     },
@@ -95,12 +95,12 @@
     },
     {
       "name": "libpng",
-      "version": "1.6.58",
-      "ref": "v1.6.58",
+      "version": "1.6.59",
+      "ref": "v1.6.59",
       "license": "libpng-2.0",
-      "sourceUrl": "https://github.com/pnggroup/libpng/archive/v1.6.58.tar.gz",
+      "sourceUrl": "https://github.com/pnggroup/libpng/archive/v1.6.59.tar.gz",
       "sourceHash": {
-        "sha256": "a9d4df463d36a6e5f9c29bd6f4967312d17e996c1854f3511f833924eb1993cf"
+        "sha256": "2540302a1844ad2b2b501977abecfa850f265f97b78f065a712ab4074a89f5b5"
       },
       "purpose": "FreeType and subtitle image support"
     },

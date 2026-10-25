@@ -26,17 +26,17 @@
     },
     {
       "name": "libass",
-      "version": "0.17.4",
-      "ref": "0.17.4",
+      "version": "0.17.5",
+      "ref": "0.17.5",
       "license": "ISC",
       "sourceUrl": "https://github.com/libass/libass"
     },
     {
       "name": "freetype2",
-      "version": "2.14.3",
-      "ref": "2.14.3",
+      "version": "2.15.0",
+      "ref": "2.15.0",
       "license": "FTL",
-      "sourceUrl": "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.3.tar.xz"
+      "sourceUrl": "https://download.savannah.gnu.org/releases/freetype/freetype-2.15.0.tar.xz"
     },
     {
       "name": "fribidi",
@@ -54,10 +54,10 @@
     },
     {
       "name": "libpng",
-      "version": "1.6.58",
-      "ref": "v1.6.58",
+      "version": "1.6.59",
+      "ref": "v1.6.59",
       "license": "libpng-2.0",
-      "sourceUrl": "https://github.com/pnggroup/libpng/archive/v1.6.58.tar.gz"
+      "sourceUrl": "https://github.com/pnggroup/libpng/archive/v1.6.59.tar.gz"
     },
     {
       "name": "zlib",
