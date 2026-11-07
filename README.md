@@ -20,7 +20,7 @@ The first three are `libmpv` runtimes. The Media3 FFmpeg decoder is one dual-ABI
 
 `armeabi-v7a` targets Android 9 / API 28 with NEON. It is not a general 32-bit Android build.
 
-The libmpv recipes for win64, Android arm64, and `armeabi-v7a` build mpv `v0.42.0` (`b0841e8c4d156b8403dc1876c4cbd9011eb583f3`), FFmpeg `9.0.2`, and libplacebo `v7.387.0` (`275f7dea27924cdd34ab2e6c20e448b6bc4fab65`). Meson disables libcurl so HTTP stays on the FFmpeg protocol. Android builds enable Vulkan. libplacebo uses shaderc; mpv's own shaderc option stays off because upstream only allows it on win32-desktop. The published stable packages are still `0.3.1` until `0.3.2` is released. Media3 FFmpeg decoder `0.3.0` and libass renderer `0.3.0` are separate pins, both built against Media3 `1.11.1`.
+The libmpv recipes for win64, Android arm64, and `armeabi-v7a` build mpv `v0.42.0` (`b0841e8c4d156b8403dc1876c4cbd9011eb583f3`), FFmpeg `9.0.2`, and libplacebo `v7.387.0` (`275f7dea27924cdd34ab2e6c20e448b6bc4fab65`). Meson disables libcurl so HTTP stays on the FFmpeg protocol. Android builds enable Vulkan. libplacebo uses shaderc; mpv's own shaderc option stays off because upstream only allows it on win32-desktop. The published stable libmpv packages are `0.3.2`. Media3 FFmpeg decoder `0.3.0` and libass renderer `0.3.0` are separate pins, both built against Media3 `1.11.1`.
 
 ## Build
 
