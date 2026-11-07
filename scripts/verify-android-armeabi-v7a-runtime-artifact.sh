@@ -462,6 +462,7 @@ check_required_text \
     "mpv setup gate" \
     "${mpv_setup}" \
     "-Dgpl=false" \
+    "-Dlibcurl=disabled" \
     "-Dcplayer=false" \
     "-Dlibmpv=true" \
     "-Daudiotrack=enabled" \
@@ -481,6 +482,7 @@ check_required_text \
     "mpv options gate" \
     "${mpv_options}" \
     "^[[:space:]]*gpl[[:space:]]+false" \
+    "^[[:space:]]*libcurl[[:space:]]+disabled" \
     "^[[:space:]]*cplayer[[:space:]]+false" \
     "^[[:space:]]*libmpv[[:space:]]+true" \
     "^[[:space:]]*audiotrack[[:space:]]+enabled" \

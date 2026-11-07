@@ -329,6 +329,7 @@ check_required_text \
     "mpv options gate" \
     "${mpv_options}" \
     "^[[:space:]]*gpl[[:space:]]+false" \
+    "^[[:space:]]*libcurl[[:space:]]+disabled" \
     "^[[:space:]]*libmpv[[:space:]]+true" \
     "^[[:space:]]*cplayer[[:space:]]+false" \
     "^[[:space:]]*d3d11[[:space:]]+enabled" \

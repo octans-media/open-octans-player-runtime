@@ -27,11 +27,11 @@ android_cpu="armv8-a"
 
 ffmpeg_version="9.0.2"
 ffmpeg_sha256="8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e"
-mpv_commit="413ff0b1cd4585294803308a1a14be2fad30cede"
-mpv_version="v0.41.0-g${mpv_commit:0:8}"
-mpv_sha256="dfdb212608e0ef75f42e0867178cf29350fc25b02ace20227e546bd060d37a70"
-libplacebo_commit="92b5ac6db79f4d680eb656692f7bf51e9606f42a"
-libplacebo_ref="${libplacebo_commit}"
+mpv_commit="b0841e8c4d156b8403dc1876c4cbd9011eb583f3"
+mpv_version="v0.42.0"
+mpv_sha256="bcfebbfa2b65a6d88dc97ea18117831072373e38b5785a2afb874ed4df5070dd"
+libplacebo_commit="275f7dea27924cdd34ab2e6c20e448b6bc4fab65"
+libplacebo_ref="v7.387.0"
 libass_ref="0.17.5"
 libass_commit="4a05d8127f525943ebf45fdc6497c9e665947f0d"
 freetype2_version="2.15.0"
@@ -543,7 +543,7 @@ libxml2_tarball="${source_cache}/libxml2-${libxml2_version}.tar.xz"
 fontconfig_tarball="${source_cache}/fontconfig-${fontconfig_version}.tar.xz"
 
 download "https://ffmpeg.org/releases/ffmpeg-${ffmpeg_version}.tar.xz" "${ffmpeg_tarball}"
-download "https://github.com/mpv-player/mpv/archive/${mpv_commit}.tar.gz" "${mpv_tarball}"
+download "https://github.com/mpv-player/mpv/archive/refs/tags/v0.42.0.tar.gz" "${mpv_tarball}"
 download "https://zlib.net/zlib-${zlib_version}.tar.xz" "${zlib_tarball}"
 download "https://github.com/pnggroup/libpng/archive/v${libpng_version}.tar.gz" "${libpng_tarball}"
 download "https://download.savannah.gnu.org/releases/freetype/freetype-${freetype2_version}.tar.xz" "${freetype_tarball}"
@@ -598,9 +598,12 @@ if [[ ! -f "${mpv_source}/demux/dovi_split.c" || ! -f "${mpv_source}/filters/f_e
     echo "mpv ${mpv_commit} is missing the Profile 7 FEL sources" >&2
     exit 1
 fi
-# The GitHub archive has no .git, so mpv's vcs_tag falls back to
-# v${MPV_VERSION}. Drop UNKNOWN so that fallback is v0.41.0-g<commit>.
-printf '%s\n' "${mpv_version#v}" >"${mpv_source}/MPV_VERSION"
+# v0.42.0 tag archive already contains MPV_VERSION. Do not rewrite it.
+mpv_version_text="$(tr -d '[:space:]' < "${mpv_source}/MPV_VERSION")"
+if [[ "${mpv_version_text}" != "${mpv_version#v}" ]]; then
+    echo "mpv ${mpv_commit} MPV_VERSION is '${mpv_version_text}', expected ${mpv_version#v}" >&2
+    exit 1
+fi
 extract_tarball "${zlib_tarball}" "${zlib_source}"
 extract_tarball "${libpng_tarball}" "${libpng_source}"
 extract_tarball "${freetype_tarball}" "${freetype_source}"
@@ -935,6 +938,19 @@ cmake_configure_build_install \
     vulkan-headers \
     "${vulkan_headers_source}" \
     "${cmake_android_common[@]}"
+# Vulkan-Headers does not install vulkan.pc for an Android CMake system name.
+# The NDK pc reports 1.3.275, and mpv 0.42 rejects anything below 1.4.309.
+mkdir -p "${deps_prefix}/lib/pkgconfig"
+cat >"${deps_prefix}/lib/pkgconfig/vulkan.pc" <<EOF
+prefix=${deps_prefix}
+includedir=\${prefix}/include
+
+Name: Vulkan-Headers
+Description: Vulkan header files
+Version: ${vulkan_headers_ref#v}
+Libs: -lvulkan
+Cflags: -I\${includedir}
+EOF
 cmake_configure_build_install \
     shaderc \
     "${shaderc_source}" \
@@ -1030,6 +1046,7 @@ mpv_meson_setup=(
     --default-library shared
     --wrap-mode nodownload
     -Dgpl=false
+    -Dlibcurl=disabled
     -Dcplayer=false
     -Dlibmpv=true
     -Dlibavdevice=disabled
